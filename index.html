@@ -13,1039 +13,1127 @@
 
 <body>
 
-<!-- =====================================================
-     TOP NAVIGATION
-===================================================== -->
+    <!-- =====================================================
+         TOP NAVIGATION
+    ===================================================== -->
 
-<nav class="top-nav">
+    <nav class="top-nav">
 
-    <div class="nav-brand">
+        <div class="nav-brand">
 
-        <div class="nav-logo">🏗️</div>
+            <div class="nav-logo">🏗️</div>
 
-        <div>
-            <strong>SMART SITE</strong>
-            <span>Digital Construction Management</span>
-        </div>
-
-    </div>
-
-    <div class="nav-links">
-        <a href="#dashboard">Dashboard</a>
-        <a href="#project">Project</a>
-        <a href="#progress">Progress</a>
-        <a href="#activities">Activities</a>
-        <a href="#safety">Safety</a>
-        <a href="#workforce">Workforce</a>
-        <a href="#equipment">Equipment</a>
-        <a href="#maintenance">Maintenance</a>
-    </div>
-
-    <button class="nav-ai-btn" onclick="openCopilot()">
-        🤖 AI Copilot
-    </button>
-
-</nav>
-
-
-<!-- =====================================================
-     HERO
-===================================================== -->
-
-<header class="hero">
-
-    <div class="hero-grid"></div>
-    <div class="hero-glow"></div>
-
-    <div class="hero-content">
-
-        <div class="construction-icon">
-            🏗️
-        </div>
-
-        <p class="hero-label">
-            L&T CONSTRUCTION • DIGITAL SITE MANAGEMENT
-        </p>
-
-        <h1>
-            Smart Construction Site
-        </h1>
-
-        <p class="hero-subtitle">
-            Real-Time Construction Progress, Workforce & Safety Management
-        </p>
-
-        <div class="hero-actions">
-
-            <a
-                class="hero-btn primary"
-                href="#dashboard"
-            >
-                Explore Dashboard
-            </a>
-
-            <button
-                class="hero-btn secondary"
-                onclick="openCopilot()"
-            >
-                🤖 Ask AI Copilot
-            </button>
+            <div>
+                <strong>SMART SITE</strong>
+                <span>Digital Construction Management</span>
+            </div>
 
         </div>
 
-        <div class="hero-status">
 
-            <span class="status-dot"></span>
+        <div class="nav-links">
 
-            SITE ACTIVE
-
-            <span class="status-divider"></span>
-
-            LIVE DATA
+            <a href="#dashboard">Dashboard</a>
+            <a href="#project">Project</a>
+            <a href="#progress">Progress</a>
+            <a href="#activities">Activities</a>
+            <a href="#safety">Safety</a>
+            <a href="#workforce">Workforce</a>
+            <a href="#equipment">Equipment</a>
+            <a href="#maintenance">Maintenance</a>
 
         </div>
 
-    </div>
-
-</header>
-
-
-<!-- =====================================================
-     MAIN CONTENT
-===================================================== -->
-
-<main class="container">
-
-
-<!-- =====================================================
-     DASHBOARD
-===================================================== -->
-
-<section id="dashboard" class="section-block">
-
-    <div class="section-title">
-
-        <div class="section-kicker">
-            COMMAND CENTER
-        </div>
-
-        <h2>
-            Site Dashboard
-        </h2>
-
-        <p>
-            Real-time overview of construction operations
-        </p>
-
-    </div>
-
-
-    <div id="dashboardStats" class="dashboard-grid">
-
-
-        <!-- PROGRESS -->
 
         <button
-            class="stat-box progress-card stat-clickable"
-            onclick="scrollToSection('progress')"
+            class="nav-ai-btn"
+            onclick="openCopilot()"
         >
-
-            <div class="stat-top">
-
-                <div class="stat-icon">
-                    📊
-                </div>
-
-                <span class="stat-mini">
-                    LIVE
-                </span>
-
-            </div>
-
-            <div class="stat-content">
-
-                <h3 id="progressValue">
-                    --
-                </h3>
-
-                <p>
-                    Overall Progress
-                </p>
-
-            </div>
-
-            <div class="stat-progress">
-
-                <div
-                    id="dashboardProgressFill"
-                    class="stat-progress-fill"
-                ></div>
-
-            </div>
-
-            <span class="stat-caption">
-                Construction Progress
-            </span>
-
+            🤖 AI Copilot
         </button>
 
+    </nav>
 
-        <!-- WORKERS -->
 
-        <button
-            class="stat-box workers-card stat-clickable"
-            onclick="scrollToSection('workforce')"
-        >
+    <!-- =====================================================
+         HERO
+    ===================================================== -->
 
-            <div class="stat-top">
+    <header class="hero">
 
-                <div class="stat-icon">
-                    👷
-                </div>
+        <div class="hero-grid"></div>
+        <div class="hero-glow"></div>
 
-                <span class="stat-mini">
-                    TEAM
-                </span>
+        <div class="hero-content">
 
+            <div class="construction-icon">
+                🏗️
             </div>
 
-            <div class="stat-content">
-
-                <h3 id="workersValue">
-                    --
-                </h3>
-
-                <p>
-                    Total Workers
-                </p>
-
-            </div>
-
-            <span class="stat-caption">
-                Active Workforce
-            </span>
-
-        </button>
-
-
-        <!-- EQUIPMENT -->
-
-        <button
-            class="stat-box equipment-card stat-clickable"
-            onclick="scrollToSection('equipment')"
-        >
-
-            <div class="stat-top">
-
-                <div class="stat-icon">
-                    🚜
-                </div>
-
-                <span class="stat-mini">
-                    ASSETS
-                </span>
-
-            </div>
-
-            <div class="stat-content">
-
-                <h3 id="equipmentValue">
-                    --
-                </h3>
-
-                <p>
-                    Total Equipment
-                </p>
-
-            </div>
-
-            <span class="stat-caption">
-                Site Equipment
-            </span>
-
-        </button>
-
-
-        <!-- SAFETY -->
-
-        <button
-            class="stat-box safety-card stat-clickable"
-            onclick="scrollToSection('safety')"
-        >
-
-            <div class="stat-top">
-
-                <div class="stat-icon">
-                    ⚠️
-                </div>
-
-                <span class="stat-mini warning-mini">
-                    ATTENTION
-                </span>
-
-            </div>
-
-            <div class="stat-content">
-
-                <h3 id="safetyValue">
-                    --
-                </h3>
-
-                <p>
-                    Open Safety Issues
-                </p>
-
-            </div>
-
-            <span class="stat-caption">
-                Requires Attention
-            </span>
-
-        </button>
-
-    </div>
-
-
-    <!-- QUICK ACTIONS -->
-
-    <div class="dashboard-lower-grid">
-
-        <div class="quick-panel">
-
-            <div class="panel-heading">
-
-                <span class="panel-icon">
-                    ⚡
-                </span>
-
-                <div>
-
-                    <span class="section-label">
-                        QUICK ACTIONS
-                    </span>
-
-                    <h3>
-                        Site Operations
-                    </h3>
-
-                </div>
-
-            </div>
-
-
-            <div class="quick-actions">
-
-                <button onclick="scrollToSection('progress')">
-                    📊 View Progress
-                </button>
-
-                <button onclick="scrollToSection('activities')">
-                    📋 Daily Activities
-                </button>
-
-                <button onclick="scrollToSection('safety')">
-                    🦺 Safety Center
-                </button>
-
-                <button onclick="openCopilot()">
-                    🤖 Ask Copilot
-                </button>
-
-            </div>
-
-        </div>
-
-
-        <div class="live-panel">
-
-            <div class="live-heading">
-
-                <span class="live-pulse"></span>
-
-                <strong>
-                    System Status
-                </strong>
-
-            </div>
-
-            <p>
-                Supabase data connection
+            <p class="hero-label">
+                L&T CONSTRUCTION • DIGITAL SITE MANAGEMENT
             </p>
 
-            <span
-                id="systemStatus"
-                class="system-badge"
-            >
-                Connecting...
-            </span>
+            <h1>
+                Smart Construction Site
+            </h1>
 
-        </div>
-
-    </div>
-
-</section>
+            <p class="hero-subtitle">
+                Real-Time Construction Progress, Workforce & Safety Management
+            </p>
 
 
-<!-- =====================================================
-     PROJECT OVERVIEW
-===================================================== -->
+            <div class="hero-actions">
 
-<section
-    id="project"
-    class="card project-overview-card"
->
+                <a
+                    class="hero-btn primary"
+                    href="#dashboard"
+                >
+                    Explore Dashboard
+                </a>
 
-    <div class="section-heading">
+                <button
+                    class="hero-btn secondary"
+                    onclick="openCopilot()"
+                >
+                    🤖 Ask AI Copilot
+                </button>
 
-        <div class="section-icon">
-            🏗️
-        </div>
-
-        <div>
-
-            <span class="section-label">
-                PROJECT DETAILS
-            </span>
-
-            <h2>
-                Project Overview
-            </h2>
-
-        </div>
-
-    </div>
+            </div>
 
 
-    <div class="project-overview-grid">
+            <div class="hero-status">
 
+                <span class="status-dot"></span>
 
-        <div class="project-detail">
+                SITE ACTIVE
 
-            <span class="detail-icon">
-                🏢
-            </span>
+                <span class="status-divider"></span>
 
-            <div>
-
-                <span class="detail-label">
-                    PROJECT
-                </span>
-
-                <strong id="projectName">
-                    Loading...
-                </strong>
+                LIVE DATA
 
             </div>
 
         </div>
 
+    </header>
 
-        <div class="project-detail">
 
-            <span class="detail-icon">
-                📍
-            </span>
+    <!-- =====================================================
+         MAIN CONTENT
+    ===================================================== -->
 
-            <div>
+    <main class="container">
 
-                <span class="detail-label">
-                    SITE LOCATION
-                </span>
 
-                <strong id="projectLocation">
-                    Loading...
-                </strong>
+        <!-- =====================================================
+             DASHBOARD
+        ===================================================== -->
 
-            </div>
+        <section
+            id="dashboard"
+            class="section-block"
+        >
 
-        </div>
+            <div class="section-title">
 
+                <div class="section-kicker">
+                    COMMAND CENTER
+                </div>
 
-        <div class="project-detail">
-
-            <span class="detail-icon">
-                🟢
-            </span>
-
-            <div>
-
-                <span class="detail-label">
-                    PROJECT STATUS
-                </span>
-
-                <strong id="projectStatus">
-                    Loading...
-                </strong>
-
-            </div>
-
-        </div>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     CONSTRUCTION PROGRESS
-===================================================== -->
-
-<section
-    id="progress"
-    class="section-block"
->
-
-    <div class="section-title">
-
-        <div class="section-kicker">
-            PROJECT TRACKING
-        </div>
-
-        <h2>
-            Construction Progress
-        </h2>
-
-        <p>
-            Monitor activity-level progress across the site
-        </p>
-
-    </div>
-
-    <div id="progressList">
-
-        <p class="loading-text">
-            Loading construction progress...
-        </p>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     DAILY ACTIVITIES
-===================================================== -->
-
-<section
-    id="activities"
-    class="section-block"
->
-
-    <div class="section-title">
-
-        <div class="section-kicker">
-            SITE LOG
-        </div>
-
-        <h2>
-            Daily Activities
-        </h2>
-
-        <p>
-            Latest recorded construction activities
-        </p>
-
-    </div>
-
-    <div id="activitiesList">
-
-        <p class="loading-text">
-            Loading daily activities...
-        </p>
-
-    </div>
-
-</section>
-
-
-<!-- =====================================================
-     SAFETY COMMAND CENTER
-===================================================== -->
-
-<section
-    id="safety"
-    class="section-block"
->
-
-    <div class="section-title">
-
-        <div class="section-kicker">
-            HSE CONTROL
-        </div>
-
-        <h2>
-            Safety Command Center
-        </h2>
-
-        <p>
-            Track site hazards, severity and resolution status
-        </p>
-
-    </div>
-
-
-    <div
-        id="safetyDashboard"
-        class="safety-dashboard"
-    >
-
-        <div class="safety-stat total">
-
-            <span>📋</span>
-
-            <strong id="totalSafetyValue">
-                --
-            </strong>
-
-            <small>
-                Total Issues
-            </small>
-
-        </div>
-
-
-        <div class="safety-stat open">
-
-            <span>⚠️</span>
-
-            <strong id="openSafetyValue">
-                --
-            </strong>
-
-            <small>
-                Open Issues
-            </small>
-
-        </div>
-
-
-        <div class="safety-stat resolved">
-
-            <span>✅</span>
-
-            <strong id="resolvedSafetyValue">
-                --
-            </strong>
-
-            <small>
-                Resolved
-            </small>
-
-        </div>
-
-
-        <div class="safety-stat high">
-
-            <span>🚨</span>
-
-            <strong id="highSafetyValue">
-                --
-            </strong>
-
-            <small>
-                High Severity
-            </small>
-
-        </div>
-
-    </div>
-
-
-    <div class="safety-instructions">
-
-        <div>
-
-            <span class="instruction-icon">
-                🦺
-            </span>
-
-            <div>
-
-                <strong>
-                    Site Safety Essentials
-                </strong>
+                <h2>
+                    Site Dashboard
+                </h2>
 
                 <p>
-                    Follow mandatory PPE and site safety practices.
+                    Real-time overview of construction operations
                 </p>
 
             </div>
 
-        </div>
 
+            <!-- DASHBOARD STAT CARDS -->
 
-        <ul>
+            <div
+                id="dashboardStats"
+                class="dashboard-grid"
+            >
 
-            <li>
-                Wear safety helmet
-            </li>
 
-            <li>
-                Wear safety shoes
-            </li>
+                <!-- PROGRESS -->
 
-            <li>
-                Follow site safety rules
-            </li>
+                <button
+                    class="stat-box progress-card stat-clickable"
+                    onclick="scrollToSection('progress')"
+                >
 
-            <li>
-                Report unsafe conditions immediately
-            </li>
+                    <div class="stat-top">
 
-        </ul>
+                        <div class="stat-icon">
+                            📊
+                        </div>
 
-    </div>
+                        <span class="stat-mini">
+                            LIVE
+                        </span>
 
+                    </div>
 
-    <div id="safetyList">
 
-        <p class="loading-text">
-            Loading safety issues...
-        </p>
+                    <div class="stat-content">
 
-    </div>
+                        <h3 id="progressValue">
+                            --
+                        </h3>
 
-</section>
+                        <p>
+                            Overall Progress
+                        </p>
 
+                    </div>
 
-<!-- =====================================================
-     WORKFORCE
-===================================================== -->
 
-<section
-    id="workforce"
-    class="section-block"
->
+                    <div class="stat-progress">
 
-    <div class="section-title">
+                        <div
+                            id="dashboardProgressFill"
+                            class="stat-progress-fill"
+                        ></div>
 
-        <div class="section-kicker">
-            RESOURCE MANAGEMENT
-        </div>
+                    </div>
 
-        <h2>
-            Worker Management
-        </h2>
 
-        <p>
-            Site workforce and role visibility
-        </p>
+                    <span class="stat-caption">
+                        Construction Progress
+                    </span>
 
-    </div>
+                </button>
 
 
-    <div
-        id="workersList"
-        class="records-grid"
-    >
+                <!-- WORKERS -->
 
-        <p class="loading-text">
-            Loading workers...
-        </p>
+                <button
+                    class="stat-box workers-card stat-clickable"
+                    onclick="scrollToSection('workforce')"
+                >
 
-    </div>
+                    <div class="stat-top">
 
-</section>
+                        <div class="stat-icon">
+                            👷
+                        </div>
 
+                        <span class="stat-mini">
+                            TEAM
+                        </span>
 
-<!-- =====================================================
-     EQUIPMENT
-===================================================== -->
+                    </div>
 
-<section
-    id="equipment"
-    class="section-block"
->
 
-    <div class="section-title">
+                    <div class="stat-content">
 
-        <div class="section-kicker">
-            ASSET MANAGEMENT
-        </div>
+                        <h3 id="workersValue">
+                            --
+                        </h3>
 
-        <h2>
-            Equipment Management
-        </h2>
+                        <p>
+                            Total Workers
+                        </p>
 
-        <p>
-            Monitor construction equipment and operational status
-        </p>
+                    </div>
 
-    </div>
 
+                    <span class="stat-caption">
+                        Active Workforce
+                    </span>
 
-    <div
-        id="equipmentList"
-        class="records-grid"
-    >
+                </button>
 
-        <p class="loading-text">
-            Loading equipment...
-        </p>
 
-    </div>
+                <!-- EQUIPMENT -->
 
-</section>
+                <button
+                    class="stat-box equipment-card stat-clickable"
+                    onclick="scrollToSection('equipment')"
+                >
 
+                    <div class="stat-top">
 
-<!-- =====================================================
-     MAINTENANCE
-===================================================== -->
+                        <div class="stat-icon">
+                            🚜
+                        </div>
 
-<section
-    id="maintenance"
-    class="section-block"
->
+                        <span class="stat-mini">
+                            ASSETS
+                        </span>
 
-    <div class="section-title">
+                    </div>
 
-        <div class="section-kicker">
-            PREVENTIVE MAINTENANCE
-        </div>
 
-        <h2>
-            Maintenance Alerts
-        </h2>
+                    <div class="stat-content">
 
-        <p>
-            Stay ahead of upcoming equipment maintenance
-        </p>
+                        <h3 id="equipmentValue">
+                            --
+                        </h3>
 
-    </div>
+                        <p>
+                            Total Equipment
+                        </p>
 
+                    </div>
 
-    <div
-        id="maintenanceList"
-        class="records-grid"
-    >
 
-        <p class="loading-text">
-            Checking maintenance status...
-        </p>
+                    <span class="stat-caption">
+                        Site Equipment
+                    </span>
 
-    </div>
+                </button>
 
-</section>
 
+                <!-- SAFETY -->
 
-<!-- =====================================================
-     SITE STATUS
-===================================================== -->
+                <button
+                    class="stat-box safety-card stat-clickable"
+                    onclick="scrollToSection('safety')"
+                >
 
-<section class="card site-status-card">
+                    <div class="stat-top">
 
-    <div>
+                        <div class="stat-icon">
+                            ⚠️
+                        </div>
 
-        <span class="section-label">
-            SITE CONTROL
-        </span>
+                        <span class="stat-mini warning-mini">
+                            ATTENTION
+                        </span>
 
-        <h2>
-            Ready for Site Review?
-        </h2>
+                    </div>
 
-        <p id="message">
-            Use the AI Copilot for a quick site summary
-            or check the latest operational data.
-        </p>
 
-    </div>
+                    <div class="stat-content">
 
+                        <h3 id="safetyValue">
+                            --
+                        </h3>
 
-    <button
-        class="primary-action"
-        onclick="showMessage()"
-    >
-        Check Site Status
-    </button>
+                        <p>
+                            Open Safety Issues
+                        </p>
 
-</section>
+                    </div>
 
 
-</main>
+                    <span class="stat-caption">
+                        Requires Attention
+                    </span>
 
+                </button>
 
-<!-- =====================================================
-     AI COPILOT FLOATING BUTTON
-===================================================== -->
+            </div>
 
-<button
-    id="copilotLauncher"
-    class="copilot-launcher"
-    onclick="openCopilot()"
->
 
-    <span class="copilot-launcher-icon">
-        🤖
-    </span>
+            <!-- =================================================
+                 QUICK ACTIONS
+            ================================================== -->
 
-    <span class="copilot-launcher-text">
+            <div class="dashboard-lower-grid">
 
-        <strong>
-            Construction AI
-        </strong>
 
-        <small>
-            Ask Copilot
-        </small>
+                <div class="quick-panel">
 
-    </span>
+                    <div class="panel-heading">
 
-</button>
+                        <span class="panel-icon">
+                            ⚡
+                        </span>
 
+                        <div>
 
-<!-- =====================================================
-     AI COPILOT WINDOW
-===================================================== -->
+                            <span class="section-label">
+                                QUICK ACTIONS
+                            </span>
 
-<div
-    id="copilotOverlay"
-    class="copilot-overlay"
-    onclick="closeCopilot(event)"
->
+                            <h3>
+                                Site Operations
+                            </h3>
 
-    <div
-        id="copilotPanel"
-        class="copilot-panel"
-        onclick="event.stopPropagation()"
-    >
+                        </div>
 
+                    </div>
 
-        <!-- COPILOT HEADER -->
 
-        <div class="copilot-header">
+                    <div class="quick-actions">
 
-            <div class="copilot-brand">
+                        <button
+                            onclick="scrollToSection('progress')"
+                        >
+                            📊 View Progress
+                        </button>
 
-                <div class="copilot-avatar">
+                        <button
+                            onclick="scrollToSection('activities')"
+                        >
+                            📋 Daily Activities
+                        </button>
+
+                        <button
+                            onclick="scrollToSection('safety')"
+                        >
+                            🦺 Safety Center
+                        </button>
+
+                        <button
+                            onclick="openCopilot()"
+                        >
+                            🤖 Ask Copilot
+                        </button>
+
+                    </div>
+
+                </div>
+
+
+                <div class="live-panel">
+
+                    <div class="live-heading">
+
+                        <span class="live-pulse"></span>
+
+                        <strong>
+                            System Status
+                        </strong>
+
+                    </div>
+
+                    <p>
+                        Supabase data connection
+                    </p>
+
+                    <span
+                        id="systemStatus"
+                        class="system-badge"
+                    >
+                        Connecting...
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             PROJECT OVERVIEW
+        ===================================================== -->
+
+        <section
+            id="project"
+            class="card project-overview-card"
+        >
+
+            <div class="section-heading">
+
+                <div class="section-icon">
                     🏗️
                 </div>
 
                 <div>
 
-                    <strong>
-                        Construction AI Copilot
-                    </strong>
-
-                    <span>
-
-                        <i></i>
-
-                        Site-aware assistant
-
+                    <span class="section-label">
+                        PROJECT DETAILS
                     </span>
 
+                    <h2>
+                        Project Overview
+                    </h2>
+
                 </div>
 
             </div>
 
 
-            <button
-                class="copilot-close"
-                onclick="closeCopilot()"
+            <div class="project-overview-grid">
+
+
+                <div class="project-detail">
+
+                    <span class="detail-icon">
+                        🏢
+                    </span>
+
+                    <div>
+
+                        <span class="detail-label">
+                            PROJECT
+                        </span>
+
+                        <strong id="projectName">
+                            Loading...
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="project-detail">
+
+                    <span class="detail-icon">
+                        📍
+                    </span>
+
+                    <div>
+
+                        <span class="detail-label">
+                            SITE LOCATION
+                        </span>
+
+                        <strong id="projectLocation">
+                            Loading...
+                        </strong>
+
+                    </div>
+
+                </div>
+
+
+                <div class="project-detail">
+
+                    <span class="detail-icon">
+                        🟢
+                    </span>
+
+                    <div>
+
+                        <span class="detail-label">
+                            PROJECT STATUS
+                        </span>
+
+                        <strong id="projectStatus">
+                            Loading...
+                        </strong>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             CONSTRUCTION PROGRESS
+        ===================================================== -->
+
+        <section
+            id="progress"
+            class="section-block"
+        >
+
+            <div class="section-title">
+
+                <div class="section-kicker">
+                    PROJECT TRACKING
+                </div>
+
+                <h2>
+                    Construction Progress
+                </h2>
+
+                <p>
+                    Monitor activity-level progress across the site
+                </p>
+
+            </div>
+
+
+            <div id="progressList">
+
+                <p class="loading-text">
+                    Loading construction progress...
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             DAILY ACTIVITIES
+        ===================================================== -->
+
+        <section
+            id="activities"
+            class="section-block"
+        >
+
+            <div class="section-title">
+
+                <div class="section-kicker">
+                    SITE LOG
+                </div>
+
+                <h2>
+                    Daily Activities
+                </h2>
+
+                <p>
+                    Latest recorded construction activities
+                </p>
+
+            </div>
+
+
+            <div id="activitiesList">
+
+                <p class="loading-text">
+                    Loading daily activities...
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             SAFETY COMMAND CENTER
+        ===================================================== -->
+
+        <section
+            id="safety"
+            class="section-block"
+        >
+
+            <div class="section-title">
+
+                <div class="section-kicker">
+                    HSE CONTROL
+                </div>
+
+                <h2>
+                    Safety Command Center
+                </h2>
+
+                <p>
+                    Track site hazards, severity and resolution status
+                </p>
+
+            </div>
+
+
+            <!-- =================================================
+                 SAFETY SUMMARY CARDS
+            ================================================== -->
+
+            <div
+                id="safetyDashboard"
+                class="safety-dashboard"
             >
-                ×
+
+                <div class="safety-stat total">
+
+                    <span>📋</span>
+
+                    <strong id="totalSafetyValue">
+                        --
+                    </strong>
+
+                    <small>
+                        Total Issues
+                    </small>
+
+                </div>
+
+
+                <div class="safety-stat open">
+
+                    <span>⚠️</span>
+
+                    <strong id="openSafetyValue">
+                        --
+                    </strong>
+
+                    <small>
+                        Open Issues
+                    </small>
+
+                </div>
+
+
+                <div class="safety-stat resolved">
+
+                    <span>✅</span>
+
+                    <strong id="resolvedSafetyValue">
+                        --
+                    </strong>
+
+                    <small>
+                        Resolved
+                    </small>
+
+                </div>
+
+
+                <div class="safety-stat high">
+
+                    <span>🚨</span>
+
+                    <strong id="highSafetyValue">
+                        --
+                    </strong>
+
+                    <small>
+                        High Severity
+                    </small>
+
+                </div>
+
+            </div>
+
+
+            <!-- =================================================
+                 SAFETY ESSENTIALS
+            ================================================== -->
+
+            <div class="safety-instructions">
+
+                <div>
+
+                    <span class="instruction-icon">
+                        🦺
+                    </span>
+
+                    <div>
+
+                        <strong>
+                            Site Safety Essentials
+                        </strong>
+
+                        <p>
+                            Follow mandatory PPE and site safety practices.
+                        </p>
+
+                    </div>
+
+                </div>
+
+
+                <ul>
+
+                    <li>
+                        Wear safety helmet
+                    </li>
+
+                    <li>
+                        Wear safety shoes
+                    </li>
+
+                    <li>
+                        Follow site safety rules
+                    </li>
+
+                    <li>
+                        Report unsafe conditions immediately
+                    </li>
+
+                </ul>
+
+            </div>
+
+
+            <!-- =================================================
+                 CURRENT SAFETY ISSUES
+            ================================================== -->
+
+            <div class="section-title safety-issues-heading">
+
+                <div class="section-kicker">
+                    REPORTED HAZARDS
+                </div>
+
+                <h2>
+                    Current Safety Issues
+                </h2>
+
+                <p>
+                    Review reported hazards, severity and resolution status
+                </p>
+
+            </div>
+
+
+            <!--
+                JavaScript loads the actual safety issue cards
+                from Supabase into this container.
+            -->
+
+            <div
+                id="safetyList"
+                class="records-grid safety-records"
+            >
+
+                <p class="loading-text">
+                    Loading safety issues...
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             WORKFORCE
+        ===================================================== -->
+
+        <section
+            id="workforce"
+            class="section-block"
+        >
+
+            <div class="section-title">
+
+                <div class="section-kicker">
+                    RESOURCE MANAGEMENT
+                </div>
+
+                <h2>
+                    Worker Management
+                </h2>
+
+                <p>
+                    Site workforce and role visibility
+                </p>
+
+            </div>
+
+
+            <div
+                id="workersList"
+                class="records-grid"
+            >
+
+                <p class="loading-text">
+                    Loading workers...
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             EQUIPMENT
+        ===================================================== -->
+
+        <section
+            id="equipment"
+            class="section-block"
+        >
+
+            <div class="section-title">
+
+                <div class="section-kicker">
+                    ASSET MANAGEMENT
+                </div>
+
+                <h2>
+                    Equipment Management
+                </h2>
+
+                <p>
+                    Monitor construction equipment and operational status
+                </p>
+
+            </div>
+
+
+            <div
+                id="equipmentList"
+                class="records-grid"
+            >
+
+                <p class="loading-text">
+                    Loading equipment...
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             MAINTENANCE
+        ===================================================== -->
+
+        <section
+            id="maintenance"
+            class="section-block"
+        >
+
+            <div class="section-title">
+
+                <div class="section-kicker">
+                    PREVENTIVE MAINTENANCE
+                </div>
+
+                <h2>
+                    Maintenance Alerts
+                </h2>
+
+                <p>
+                    Stay ahead of upcoming equipment maintenance
+                </p>
+
+            </div>
+
+
+            <div
+                id="maintenanceList"
+                class="records-grid"
+            >
+
+                <p class="loading-text">
+                    Checking maintenance status...
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- =====================================================
+             SITE STATUS
+        ===================================================== -->
+
+        <section
+            class="card site-status-card"
+        >
+
+            <div>
+
+                <span class="section-label">
+                    SITE CONTROL
+                </span>
+
+                <h2>
+                    Ready for Site Review?
+                </h2>
+
+                <p id="message">
+                    Use the AI Copilot for a quick site summary
+                    or check the latest operational data.
+                </p>
+
+            </div>
+
+
+            <button
+                class="primary-action"
+                onclick="showMessage()"
+            >
+                Check Site Status
             </button>
 
-        </div>
+        </section>
 
 
-        <!-- CHAT MESSAGES -->
+    </main>
+
+
+    <!-- =====================================================
+         AI COPILOT FLOATING BUTTON
+    ===================================================== -->
+
+    <button
+        id="copilotLauncher"
+        class="copilot-launcher"
+        onclick="openCopilot()"
+    >
+
+        <span class="copilot-launcher-icon">
+            🤖
+        </span>
+
+        <span class="copilot-launcher-text">
+
+            <strong>
+                Construction AI
+            </strong>
+
+            <small>
+                Ask Copilot
+            </small>
+
+        </span>
+
+    </button>
+
+
+    <!-- =====================================================
+         AI COPILOT WINDOW
+    ===================================================== -->
+
+    <div
+        id="copilotOverlay"
+        class="copilot-overlay"
+        onclick="closeCopilot(event)"
+    >
 
         <div
-            id="chatMessages"
-            class="chat-messages"
+            id="copilotPanel"
+            class="copilot-panel"
+            onclick="event.stopPropagation()"
         >
 
-            <div class="chat-message assistant">
 
-                <div class="message-avatar">
-                    🤖
+            <!-- COPILOT HEADER -->
+
+            <div class="copilot-header">
+
+                <div class="copilot-brand">
+
+                    <div class="copilot-avatar">
+                        🏗️
+                    </div>
+
+                    <div>
+
+                        <strong>
+                            Construction AI Copilot
+                        </strong>
+
+                        <span>
+
+                            <i></i>
+
+                            Site-aware assistant
+
+                        </span>
+
+                    </div>
+
                 </div>
 
-                <div class="message-bubble">
 
-                    Hello! I'm your
-                    <strong>
-                        Construction AI Copilot
-                    </strong>.
+                <button
+                    class="copilot-close"
+                    onclick="closeCopilot()"
+                >
+                    ×
+                </button>
 
-                    <br><br>
+            </div>
 
-                    I can help you understand project
-                    progress, safety issues, workforce,
-                    equipment and maintenance.
+
+            <!-- CHAT MESSAGES -->
+
+            <div
+                id="chatMessages"
+                class="chat-messages"
+            >
+
+                <div class="chat-message assistant">
+
+                    <div class="message-avatar">
+                        🤖
+                    </div>
+
+                    <div class="message-bubble">
+
+                        Hello! I'm your
+                        <strong>
+                            Construction AI Copilot
+                        </strong>.
+
+                        <br><br>
+
+                        I can help you understand project
+                        progress, safety issues, workforce,
+                        equipment and maintenance.
+
+                    </div>
 
                 </div>
 
             </div>
 
+
+            <!-- QUICK PROMPTS -->
+
+            <div class="quick-prompts">
+
+                <button
+                    onclick="askCopilot('Give me a site summary')"
+                >
+                    Site Summary
+                </button>
+
+                <button
+                    onclick="askCopilot('What are the current safety concerns?')"
+                >
+                    Safety
+                </button>
+
+                <button
+                    onclick="askCopilot('Which equipment needs maintenance?')"
+                >
+                    Maintenance
+                </button>
+
+                <button
+                    onclick="askCopilot('What are today’s activities?')"
+                >
+                    Activities
+                </button>
+
+            </div>
+
+
+            <!-- CHAT INPUT -->
+
+            <form
+                id="chatForm"
+                class="chat-input-area"
+            >
+
+                <input
+                    id="chatInput"
+                    type="text"
+                    placeholder="Ask about your construction site..."
+                    autocomplete="off"
+                >
+
+                <button
+                    type="submit"
+                    aria-label="Send message"
+                >
+                    ➤
+                </button>
+
+            </form>
+
         </div>
-
-
-        <!-- QUICK PROMPTS -->
-
-        <div class="quick-prompts">
-
-            <button
-                onclick="askCopilot('Give me a site summary')"
-            >
-                Site Summary
-            </button>
-
-            <button
-                onclick="askCopilot('What are the current safety concerns?')"
-            >
-                Safety
-            </button>
-
-            <button
-                onclick="askCopilot('Which equipment needs maintenance?')"
-            >
-                Maintenance
-            </button>
-
-            <button
-                onclick="askCopilot('What are today’s activities?')"
-            >
-                Activities
-            </button>
-
-        </div>
-
-
-        <!-- CHAT INPUT -->
-
-        <form
-            id="chatForm"
-            class="chat-input-area"
-        >
-
-            <input
-                id="chatInput"
-                type="text"
-                placeholder="Ask about your construction site..."
-                autocomplete="off"
-            >
-
-            <button
-                type="submit"
-                aria-label="Send message"
-            >
-                ➤
-            </button>
-
-        </form>
 
     </div>
 
-</div>
 
-<!-- SUPABASE + APPLICATION SCRIPT -->
+    <!-- =====================================================
+         SUPABASE
+    ===================================================== -->
 
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 
-<script src="script.js"></script>
+
+    <!-- =====================================================
+         APPLICATION JAVASCRIPT
+    ===================================================== -->
+
+    <script src="script.js"></script>
+
 
 </body>
+
 </html>

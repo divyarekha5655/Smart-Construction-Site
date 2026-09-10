@@ -11,12 +11,11 @@
 const SUPABASE_URL =
     "https://jfkerdxnccomdyyziitz.supabase.co";
 
-// IMPORTANT:
-// Put your existing Supabase publishable/anon key here.
-// Do NOT use a service-role/secret key.
-const SUPABASE_KEY ="sb_publishable_Aq5Gjot6Mht1MUjYwNjfzg_pvvDq1eI";
-    
+// Keep your existing publishable/anon key here.
+// NEVER use a service-role/secret key in browser code.
 
+const SUPABASE_KEY =
+    "sb_publishable_Aq5Gjot6Mht1MUjYwNjfzg_pvvDq1eI";
 
 const supabaseClient =
     supabase.createClient(
@@ -27,42 +26,27 @@ const supabaseClient =
 
 // ==========================================================
 // GLOBAL SITE DATA
-// Used by AI Copilot
 // ==========================================================
 
 const siteData = {
-
     project: null,
-
     progress: [],
-
     activities: [],
-
     safetyIssues: [],
-
     workers: [],
-
     equipment: [],
-
     maintenance: [],
-
     dashboard: {},
-
     safetyDashboard: {}
-
 };
 
 
 // ==========================================================
-// HELPER FUNCTIONS
+// GENERAL HELPERS
 // ==========================================================
 
 function safeText(value) {
-
-    if (
-        value === null ||
-        value === undefined
-    ) {
+    if (value === null || value === undefined) {
         return "";
     }
 
@@ -72,27 +56,39 @@ function safeText(value) {
         .replace(/>/g, "&gt;")
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
+}
 
+
+// Compatibility helper.
+// This prevents errors if any older HTML code uses safe().
+function safe(value) {
+    return safeText(value);
 }
 
 
 function setText(id, value) {
-
-    const element =
-        document.getElementById(id);
+    const element = document.getElementById(id);
 
     if (element) {
-
         element.textContent =
             value ?? "";
-
     }
+}
 
+
+function clampProgress(value) {
+    return Math.min(
+        Math.max(
+            Number(value) || 0,
+            0
+        ),
+        100
+    );
 }
 
 
 // ==========================================================
-// INTERACTIVE SECTION NAVIGATION
+// SECTION NAVIGATION
 // ==========================================================
 
 function scrollToSection(target) {
@@ -110,7 +106,6 @@ function scrollToSection(target) {
         document.getElementById(sectionId);
 
     if (!element) {
-
         console.warn(
             "Section not found:",
             sectionId
@@ -120,32 +115,233 @@ function scrollToSection(target) {
     }
 
     element.scrollIntoView({
-
         behavior: "smooth",
-
         block: "start"
-
     });
 
     document
         .querySelectorAll("section")
         .forEach(section => {
-
-            section.classList
-                .remove("active-section");
-
+            section.classList.remove(
+                "active-section"
+            );
         });
 
-    element.classList
-        .add("active-section");
+    element.classList.add(
+        "active-section"
+    );
 
     return true;
-
 }
-
 
 window.scrollToSection =
     scrollToSection;
+
+
+// ==========================================================
+// CHECK SITE STATUS
+// ==========================================================
+
+function showMessage() {
+
+    const messageElement =
+        document.getElementById("message");
+
+    if (!messageElement) {
+
+        console.warn(
+            "Check Site Status: #message element not found."
+        );
+
+        return;
+    }
+
+
+    const dashboard =
+        siteData.dashboard || {};
+
+    const safety =
+        siteData.safetyDashboard || {};
+
+
+    const overallProgress =
+        Number(
+            dashboard.overallProgress
+        ) || 0;
+
+
+    const openSafety =
+        Number(
+            safety.openIssues
+        ) || 0;
+
+
+    const highSafety =
+        Number(
+            safety.highSeverityIssues
+        ) || 0;
+
+
+    const totalWorkers =
+        Number(
+            dashboard.totalWorkers
+        ) || 0;
+
+
+    const totalEquipment =
+        Number(
+            dashboard.totalEquipment
+        ) || 0;
+
+
+    // Count maintenance items due today
+    // or already overdue.
+    const maintenanceDue =
+        (siteData.maintenance || [])
+            .filter(item => {
+
+                if (
+                    !item.next_maintenance_date
+                ) {
+                    return false;
+                }
+
+                const maintenanceDate =
+                    new Date(
+                        item.next_maintenance_date +
+                        "T00:00:00"
+                    );
+
+                const today =
+                    new Date();
+
+                today.setHours(
+                    0,
+                    0,
+                    0,
+                    0
+                );
+
+                return (
+                    maintenanceDate <= today
+                );
+            })
+            .length;
+
+
+    let statusTitle;
+    let statusText;
+
+
+    // HIGH SAFETY ISSUE
+    if (highSafety > 0) {
+
+        statusTitle =
+            "SITE STATUS: ATTENTION REQUIRED";
+
+        statusText =
+            `There ${
+                highSafety === 1
+                    ? "is"
+                    : "are"
+            } ${highSafety} high-severity safety issue${
+                highSafety === 1
+                    ? ""
+                    : "s"
+            } currently recorded on the site. ${
+                openSafety
+            } safety issue${
+                openSafety === 1
+                    ? ""
+                    : "s"
+            } remain open. Immediate safety review is recommended.`;
+    }
+
+
+    // OPEN SAFETY OR MAINTENANCE
+    else if (
+        openSafety > 0 ||
+        maintenanceDue > 0
+    ) {
+
+        statusTitle =
+            "SITE STATUS: MONITOR";
+
+        statusText =
+            `The project is currently ${overallProgress}% complete. ${
+                openSafety === 1
+                    ? "There is"
+                    : `There are ${openSafety}`
+            } ${
+                openSafety === 1
+                    ? "1 open safety issue."
+                    : "open safety issues."
+            } ${
+                maintenanceDue
+            } equipment item${
+                maintenanceDue === 1
+                    ? " is"
+                    : "s are"
+            } due for maintenance. The site should continue to be monitored.`;
+    }
+
+
+    // NORMAL
+    else {
+
+        statusTitle =
+            "SITE STATUS: OPERATIONAL";
+
+        statusText =
+            `The project is currently ${overallProgress}% complete. No open safety issues or overdue maintenance items were detected. The site is operating normally.`;
+    }
+
+
+    messageElement.innerHTML = `
+
+        <div class="site-status-result">
+
+            <strong>
+                ${safeText(statusTitle)}
+            </strong>
+
+            <p>
+                ${safeText(statusText)}
+            </p>
+
+            <div class="site-status-details">
+
+                <span>
+                    Progress: ${overallProgress}%
+                </span>
+
+                <span>
+                    Workers: ${totalWorkers}
+                </span>
+
+                <span>
+                    Equipment: ${totalEquipment}
+                </span>
+
+                <span>
+                    Open Safety Issues: ${openSafety}
+                </span>
+
+            </div>
+
+        </div>
+
+    `;
+
+
+    messageElement.scrollIntoView({
+        behavior: "smooth",
+        block: "center"
+    });
+}
+
+window.showMessage =
+    showMessage;
 
 
 // ==========================================================
@@ -157,23 +353,17 @@ async function loadProject() {
     const {
         data,
         error
-    } =
-        await supabaseClient
-
-            .from("projects")
-
-            .select("*")
-
-            .order(
-                "created_at",
-                {
-                    ascending: false
-                }
-            )
-
-            .limit(1)
-
-            .single();
+    } = await supabaseClient
+        .from("projects")
+        .select("*")
+        .order(
+            "created_at",
+            {
+                ascending: false
+            }
+        )
+        .limit(1)
+        .single();
 
 
     if (error) {
@@ -184,7 +374,6 @@ async function loadProject() {
         );
 
         return;
-
     }
 
 
@@ -206,7 +395,7 @@ async function loadProject() {
 
     setText(
         "projectStatus",
-        data.status
+        data.status || "Active"
     );
 
 
@@ -214,7 +403,6 @@ async function loadProject() {
         "Project loaded successfully:",
         data
     );
-
 }
 
 
@@ -227,21 +415,24 @@ async function loadProgress() {
     const {
         data,
         error
-    } =
-        await supabaseClient
-
-            .from("activities")
-
-            .select(
-                "id, activity_name, progress, status, activity_date, location, workers_count, remarks"
-            )
-
-            .order(
-                "id",
-                {
-                    ascending: true
-                }
-            );
+    } = await supabaseClient
+        .from("activities")
+        .select(`
+            id,
+            activity_name,
+            progress,
+            status,
+            activity_date,
+            location,
+            workers_count,
+            remarks
+        `)
+        .order(
+            "id",
+            {
+                ascending: true
+            }
+        );
 
 
     if (error) {
@@ -252,7 +443,6 @@ async function loadProgress() {
         );
 
         return;
-
     }
 
 
@@ -273,7 +463,6 @@ async function loadProgress() {
         );
 
         return;
-
     }
 
 
@@ -286,155 +475,71 @@ async function loadProgress() {
     ) {
 
         progressList.innerHTML = `
-
             <div class="empty-state">
-
                 No construction progress records available.
-
             </div>
-
         `;
 
         return;
-
     }
 
 
     data.forEach(activity => {
 
         const progress =
-            Number(activity.progress) || 0;
-
-
-        let statusClass =
-            "progress-status";
-
-
-        if (
-            activity.status ===
-            "Completed"
-        ) {
-
-            statusClass +=
-                " completed";
-
-        }
-
-        else if (
-            activity.status ===
-            "In Progress"
-        ) {
-
-            statusClass +=
-                " in-progress";
-
-        }
+            clampProgress(
+                activity.progress
+            );
 
 
         const item =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
+
+
+        item.className =
+            "progress-summary-card";
 
 
         item.innerHTML = `
 
-            <div class="construction-progress-card">
+            <div class="progress-summary-main">
 
-                <div class="progress-card-header">
+                <div>
 
-                    <div class="activity-icon">
-                        🏗️
-                    </div>
-
-                    <div class="activity-info">
-
-                        <h3>
-                            ${safeText(
-                                activity.activity_name
-                            )}
-                        </h3>
-
-                        <span
-                            class="${statusClass}"
-                        >
-                            ${safeText(
-                                activity.status ||
-                                "Not Updated"
-                            )}
-                        </span>
-
-                    </div>
-
-                    <div class="progress-percentage">
-                        ${progress}%
-                    </div>
-
-                </div>
-
-
-                <div class="progress-bar-container">
-
-                    <div
-                        class="construction-progress-fill"
-                        style="
-                            width:
-                            ${Math.min(
-                                Math.max(
-                                    progress,
-                                    0
-                                ),
-                                100
-                            )}%;
-                        "
-                    ></div>
-
-                </div>
-
-
-                <div class="progress-footer">
-
-                    <span>
-                        Construction Progress
+                    <span class="progress-label">
+                        CONSTRUCTION ACTIVITY
                     </span>
 
-                    <strong>
-                        ${progress}% Complete
-                    </strong>
+                    <h3>
+                        ${safeText(
+                            activity.activity_name
+                        )}
+                    </h3>
+
+                    <span class="progress-status">
+                        ${safeText(
+                            activity.status ||
+                            "Not Updated"
+                        )}
+                    </span>
 
                 </div>
 
 
-                <div class="progress-extra-info">
+                <div class="progress-summary-right">
 
-                    ${
-                        activity.location
+                    <strong>
+                        ${progress}%
+                    </strong>
 
-                        ? `
-                            <span>
-                                📍
-                                ${safeText(
-                                    activity.location
-                                )}
-                            </span>
-                          `
-
-                        : ""
-                    }
-
-
-                    ${
-                        activity.activity_date
-
-                        ? `
-                            <span>
-                                📅
-                                ${safeText(
-                                    activity.activity_date
-                                )}
-                            </span>
-                          `
-
-                        : ""
-                    }
+                    <button
+                        type="button"
+                        class="view-details-btn"
+                    >
+                        View Details
+                    </button>
 
                 </div>
 
@@ -443,28 +548,20 @@ async function loadProgress() {
         `;
 
 
-        item.style.cursor =
-            "pointer";
+        const detailsButton =
+            item.querySelector(
+                ".view-details-btn"
+            );
 
 
-        item.addEventListener(
+        detailsButton.addEventListener(
             "click",
-            () => {
+            function(event) {
 
-                openCopilot();
+                event.stopPropagation();
 
-
-                setTimeout(
-                    () => {
-
-                        askCopilot(
-
-                            `Tell me more about the construction activity "${activity.activity_name}" and its current progress of ${progress}%.`
-
-                        );
-
-                    },
-                    300
+                showProgressDetails(
+                    activity
                 );
 
             }
@@ -482,7 +579,243 @@ async function loadProgress() {
         "Construction progress loaded successfully:",
         data
     );
+}
 
+
+// ==========================================================
+// PROGRESS DETAILS
+// ==========================================================
+
+function showProgressDetails(
+    activity
+) {
+
+    const progress =
+        clampProgress(
+            activity.progress
+        );
+
+
+    const oldModal =
+        document.getElementById(
+            "progressDetailsModal"
+        );
+
+
+    if (oldModal) {
+        oldModal.remove();
+    }
+
+
+    const modal =
+        document.createElement(
+            "div"
+        );
+
+
+    modal.id =
+        "progressDetailsModal";
+
+    modal.className =
+        "details-modal-overlay";
+
+
+    modal.innerHTML = `
+
+        <div class="details-modal">
+
+            <button
+                type="button"
+                class="details-modal-close"
+                aria-label="Close"
+            >
+                ×
+            </button>
+
+
+            <div class="details-modal-header">
+
+                <span>
+                    CONSTRUCTION ACTIVITY
+                </span>
+
+                <h2>
+                    ${safeText(
+                        activity.activity_name
+                    )}
+                </h2>
+
+            </div>
+
+
+            <div class="details-modal-grid">
+
+                <div class="detail-item">
+                    <small>PROGRESS</small>
+                    <strong>
+                        ${progress}%
+                    </strong>
+                </div>
+
+
+                <div class="detail-item">
+                    <small>STATUS</small>
+                    <strong>
+                        ${safeText(
+                            activity.status ||
+                            "Not Updated"
+                        )}
+                    </strong>
+                </div>
+
+
+                <div class="detail-item">
+                    <small>DATE</small>
+                    <strong>
+                        ${safeText(
+                            activity.activity_date ||
+                            "Not available"
+                        )}
+                    </strong>
+                </div>
+
+
+                <div class="detail-item">
+                    <small>LOCATION</small>
+                    <strong>
+                        ${safeText(
+                            activity.location ||
+                            "Not available"
+                        )}
+                    </strong>
+                </div>
+
+
+                <div class="detail-item">
+                    <small>WORKERS</small>
+                    <strong>
+                        ${activity.workers_count ?? 0}
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <div class="detail-progress-section">
+
+                <div class="detail-progress-label">
+
+                    <span>
+                        Construction Progress
+                    </span>
+
+                    <strong>
+                        ${progress}%
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-progress-bar">
+
+                    <div
+                        style="width:${progress}%"
+                    ></div>
+
+                </div>
+
+            </div>
+
+
+            <div class="detail-remarks">
+
+                <small>
+                    REMARKS
+                </small>
+
+                <p>
+                    ${safeText(
+                        activity.remarks ||
+                        "No remarks provided."
+                    )}
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="detail-ai-btn"
+            >
+                Ask AI Copilot About This Activity
+            </button>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(
+        modal
+    );
+
+
+    const closeButton =
+        modal.querySelector(
+            ".details-modal-close"
+        );
+
+
+    closeButton.addEventListener(
+        "click",
+        function() {
+            modal.remove();
+        }
+    );
+
+
+    modal.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target === modal
+            ) {
+                modal.remove();
+            }
+
+        }
+    );
+
+
+    const aiButton =
+        modal.querySelector(
+            ".detail-ai-btn"
+        );
+
+
+    aiButton.addEventListener(
+        "click",
+        function() {
+
+            modal.remove();
+
+            openCopilot();
+
+
+            setTimeout(
+                function() {
+
+                    askCopilot(
+                        `Tell me about the construction activity "${activity.activity_name}". Current progress is ${progress}%. Status is "${activity.status || "not specified"}". Location is "${activity.location || "not specified"}". Workers assigned: ${activity.workers_count ?? 0}. Remarks: "${activity.remarks || "none"}".`
+                    );
+
+                },
+                300
+            );
+
+        }
+    );
 }
 
 
@@ -495,30 +828,31 @@ async function loadDailyActivities() {
     const {
         data,
         error
-    } =
-        await supabaseClient
-
-            .from("activities")
-
-            .select(
-                "id, activity_name, progress, status, activity_date, location, workers_count, remarks"
-            )
-
-            .order(
-                "activity_date",
-                {
-                    ascending: false
-                }
-            )
-
-            .order(
-                "id",
-                {
-                    ascending: false
-                }
-            )
-
-            .limit(3);
+    } = await supabaseClient
+        .from("activities")
+        .select(`
+            id,
+            activity_name,
+            progress,
+            status,
+            activity_date,
+            location,
+            workers_count,
+            remarks
+        `)
+        .order(
+            "activity_date",
+            {
+                ascending: false
+            }
+        )
+        .order(
+            "id",
+            {
+                ascending: false
+            }
+        )
+        .limit(3);
 
 
     if (error) {
@@ -529,7 +863,6 @@ async function loadDailyActivities() {
         );
 
         return;
-
     }
 
 
@@ -550,7 +883,6 @@ async function loadDailyActivities() {
         );
 
         return;
-
     }
 
 
@@ -564,24 +896,27 @@ async function loadDailyActivities() {
     ) {
 
         activitiesList.innerHTML = `
-
             <div class="empty-state">
-
                 No daily activities available.
-
             </div>
-
         `;
 
         return;
-
     }
 
 
     data.forEach(activity => {
 
         const progress =
-            Number(activity.progress) || 0;
+            clampProgress(
+                activity.progress
+            );
+
+
+        const item =
+            document.createElement(
+                "div"
+            );
 
 
         let statusClass =
@@ -596,21 +931,14 @@ async function loadDailyActivities() {
             statusClass +=
                 " completed";
 
-        }
-
-        else if (
+        } else if (
             activity.status ===
             "In Progress"
         ) {
 
             statusClass +=
                 " in-progress";
-
         }
-
-
-        const item =
-            document.createElement("div");
 
 
         item.innerHTML = `
@@ -620,7 +948,7 @@ async function loadDailyActivities() {
                 <div class="daily-activity-header">
 
                     <div class="daily-activity-icon">
-                        🏗️
+                        Construction
                     </div>
 
 
@@ -632,9 +960,7 @@ async function loadDailyActivities() {
                             )}
                         </h3>
 
-                        <span
-                            class="${statusClass}"
-                        >
+                        <span class="${statusClass}">
                             ${safeText(
                                 activity.status ||
                                 "Not Updated"
@@ -645,117 +971,20 @@ async function loadDailyActivities() {
 
 
                     <div class="daily-activity-progress">
-
                         ${progress}%
-
                     </div>
 
                 </div>
 
 
-                <div class="daily-activity-details">
+                <div class="daily-activity-action">
 
-
-                    <div class="activity-detail">
-
-                        <span>📅</span>
-
-                        <div>
-
-                            <small>
-                                DATE
-                            </small>
-
-                            <strong>
-
-                                ${safeText(
-                                    activity.activity_date ||
-                                    "Not available"
-                                )}
-
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="activity-detail">
-
-                        <span>📍</span>
-
-                        <div>
-
-                            <small>
-                                LOCATION
-                            </small>
-
-                            <strong>
-
-                                ${safeText(
-                                    activity.location ||
-                                    "Not available"
-                                )}
-
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="activity-detail">
-
-                        <span>👷</span>
-
-                        <div>
-
-                            <small>
-                                WORKERS
-                            </small>
-
-                            <strong>
-
-                                ${activity.workers_count ?? 0}
-
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                </div>
-
-
-                <div class="activity-progress-bar">
-
-                    <div
-                        style="
-                            width:
-                            ${Math.min(
-                                Math.max(
-                                    progress,
-                                    0
-                                ),
-                                100
-                            )}%;
-                        "
-                    ></div>
-
-                </div>
-
-
-                <div class="activity-remarks">
-
-                    <strong>
-                        Remarks:
-                    </strong>
-
-                    ${safeText(
-                        activity.remarks ||
-                        "No remarks provided"
-                    )}
+                    <button
+                        type="button"
+                        class="view-details-btn activity-details-btn"
+                    >
+                        View Details
+                    </button>
 
                 </div>
 
@@ -764,28 +993,18 @@ async function loadDailyActivities() {
         `;
 
 
-        item.style.cursor =
-            "pointer";
+        const detailsButton =
+            item.querySelector(
+                ".activity-details-btn"
+            );
 
 
-        item.addEventListener(
+        detailsButton.addEventListener(
             "click",
-            () => {
+            function() {
 
-                openCopilot();
-
-
-                setTimeout(
-                    () => {
-
-                        askCopilot(
-
-                            `Explain today's construction activity "${activity.activity_name}" at ${activity.location || "the site"}.`
-
-                        );
-
-                    },
-                    300
+                showActivityDetails(
+                    activity
                 );
 
             }
@@ -803,7 +1022,243 @@ async function loadDailyActivities() {
         "Daily activities loaded successfully:",
         data
     );
+}
 
+
+// ==========================================================
+// DAILY ACTIVITY DETAILS
+// ==========================================================
+
+function showActivityDetails(
+    activity
+) {
+
+    const progress =
+        clampProgress(
+            activity.progress
+        );
+
+
+    const oldModal =
+        document.getElementById(
+            "activityDetailsModal"
+        );
+
+
+    if (oldModal) {
+        oldModal.remove();
+    }
+
+
+    const modal =
+        document.createElement(
+            "div"
+        );
+
+
+    modal.id =
+        "activityDetailsModal";
+
+    modal.className =
+        "details-modal-overlay";
+
+
+    modal.innerHTML = `
+
+        <div class="details-modal">
+
+            <button
+                type="button"
+                class="details-modal-close"
+                aria-label="Close"
+            >
+                ×
+            </button>
+
+
+            <div class="details-modal-header">
+
+                <span>
+                    DAILY ACTIVITY
+                </span>
+
+                <h2>
+                    ${safeText(
+                        activity.activity_name
+                    )}
+                </h2>
+
+            </div>
+
+
+            <div class="details-modal-grid">
+
+                <div class="detail-item">
+                    <small>PROGRESS</small>
+                    <strong>
+                        ${progress}%
+                    </strong>
+                </div>
+
+
+                <div class="detail-item">
+                    <small>STATUS</small>
+                    <strong>
+                        ${safeText(
+                            activity.status ||
+                            "Not Updated"
+                        )}
+                    </strong>
+                </div>
+
+
+                <div class="detail-item">
+                    <small>DATE</small>
+                    <strong>
+                        ${safeText(
+                            activity.activity_date ||
+                            "Not available"
+                        )}
+                    </strong>
+                </div>
+
+
+                <div class="detail-item">
+                    <small>LOCATION</small>
+                    <strong>
+                        ${safeText(
+                            activity.location ||
+                            "Not available"
+                        )}
+                    </strong>
+                </div>
+
+
+                <div class="detail-item">
+                    <small>WORKERS</small>
+                    <strong>
+                        ${activity.workers_count ?? 0}
+                    </strong>
+                </div>
+
+            </div>
+
+
+            <div class="detail-progress-section">
+
+                <div class="detail-progress-label">
+
+                    <span>
+                        Activity Progress
+                    </span>
+
+                    <strong>
+                        ${progress}%
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-progress-bar">
+
+                    <div
+                        style="width:${progress}%"
+                    ></div>
+
+                </div>
+
+            </div>
+
+
+            <div class="detail-remarks">
+
+                <small>
+                    REMARKS
+                </small>
+
+                <p>
+                    ${safeText(
+                        activity.remarks ||
+                        "No remarks provided."
+                    )}
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="detail-ai-btn"
+            >
+                Ask AI Copilot About This Activity
+            </button>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(
+        modal
+    );
+
+
+    const closeButton =
+        modal.querySelector(
+            ".details-modal-close"
+        );
+
+
+    closeButton.addEventListener(
+        "click",
+        function() {
+            modal.remove();
+        }
+    );
+
+
+    modal.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target === modal
+            ) {
+                modal.remove();
+            }
+
+        }
+    );
+
+
+    const aiButton =
+        modal.querySelector(
+            ".detail-ai-btn"
+        );
+
+
+    aiButton.addEventListener(
+        "click",
+        function() {
+
+            modal.remove();
+
+            openCopilot();
+
+
+            setTimeout(
+                function() {
+
+                    askCopilot(
+                        `Tell me about the daily construction activity "${activity.activity_name}". Its current progress is ${progress}%. Its status is "${activity.status || "not specified"}". It is located at "${activity.location || "not specified"}". Workers assigned: ${activity.workers_count ?? 0}. Remarks: "${activity.remarks || "none"}".`
+                    );
+
+                },
+                300
+            );
+
+        }
+    );
 }
 
 
@@ -813,47 +1268,9 @@ async function loadDailyActivities() {
 
 async function loadSafetyIssues() {
 
-    const {
-        data,
-        error
-    } =
-        await supabaseClient
-
-            .from("safety_issues")
-
-            .select(
-                "id, issue, location, severity, status, reported_by, reported_date, remarks"
-            )
-
-            .order(
-                "reported_date",
-                {
-                    ascending: false
-                }
-            )
-
-            .order(
-                "id",
-                {
-                    ascending: false
-                }
-            );
-
-
-    if (error) {
-
-        console.error(
-            "Error loading safety issues:",
-            error
-        );
-
-        return;
-
-    }
-
-
-    siteData.safetyIssues =
-        data || [];
+    console.log(
+        "Loading safety issues..."
+    );
 
 
     const safetyList =
@@ -864,17 +1281,78 @@ async function loadSafetyIssues() {
 
     if (!safetyList) {
 
-        console.warn(
-            "safetyList not found"
+        console.error(
+            "ERROR: safetyList was not found in HTML."
         );
 
         return;
-
     }
 
 
-    safetyList.innerHTML =
-        "";
+    safetyList.innerHTML = `
+        <p class="loading-text">
+            Loading safety issues...
+        </p>
+    `;
+
+
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .from("safety_issues")
+        .select(`
+            id,
+            issue,
+            location,
+            severity,
+            status,
+            reported_by,
+            reported_date,
+            remarks
+        `)
+        .order(
+            "reported_date",
+            {
+                ascending: false
+            }
+        )
+        .order(
+            "id",
+            {
+                ascending: false
+            }
+        );
+
+
+    if (error) {
+
+        console.error(
+            "Error loading safety issues:",
+            error
+        );
+
+
+        safetyList.innerHTML = `
+            <div class="empty-state">
+                Unable to load safety issues.
+                <br>
+                Please check the browser console.
+            </div>
+        `;
+
+        return;
+    }
+
+
+    console.log(
+        "Safety issues loaded:",
+        data
+    );
+
+
+    siteData.safetyIssues =
+        data || [];
 
 
     if (
@@ -883,21 +1361,26 @@ async function loadSafetyIssues() {
     ) {
 
         safetyList.innerHTML = `
-
             <div class="empty-state">
-
-                No safety issues reported.
-
+                No safety issues recorded.
             </div>
-
         `;
 
         return;
-
     }
 
 
+    safetyList.innerHTML =
+        "";
+
+
     data.forEach(issue => {
+
+        const item =
+            document.createElement(
+                "div"
+            );
+
 
         let severityClass =
             "safety-severity";
@@ -911,9 +1394,7 @@ async function loadSafetyIssues() {
             severityClass +=
                 " high";
 
-        }
-
-        else if (
+        } else if (
             issue.severity ===
             "Medium"
         ) {
@@ -921,16 +1402,13 @@ async function loadSafetyIssues() {
             severityClass +=
                 " medium";
 
-        }
-
-        else if (
+        } else if (
             issue.severity ===
             "Low"
         ) {
 
             severityClass +=
                 " low";
-
         }
 
 
@@ -946,21 +1424,14 @@ async function loadSafetyIssues() {
             statusClass +=
                 " open";
 
-        }
-
-        else if (
+        } else if (
             issue.status ===
             "Resolved"
         ) {
 
             statusClass +=
                 " resolved";
-
         }
-
-
-        const item =
-            document.createElement("div");
 
 
         item.innerHTML = `
@@ -970,18 +1441,16 @@ async function loadSafetyIssues() {
                 <div class="safety-alert-header">
 
                     <div class="safety-alert-icon">
-                        ⚠️
+                        SAFETY
                     </div>
 
 
                     <div class="safety-alert-title">
 
                         <h3>
-
                             ${safeText(
                                 issue.issue
                             )}
-
                         </h3>
 
 
@@ -990,22 +1459,18 @@ async function loadSafetyIssues() {
                             <span
                                 class="${severityClass}"
                             >
-
                                 ${safeText(
                                     issue.severity
                                 )}
-
                             </span>
 
 
                             <span
                                 class="${statusClass}"
                             >
-
                                 ${safeText(
                                     issue.status
                                 )}
-
                             </span>
 
                         </div>
@@ -1015,124 +1480,47 @@ async function loadSafetyIssues() {
                 </div>
 
 
-                <div class="safety-details">
+                <div class="safety-summary">
 
+                    <span>
+                        ${safeText(
+                            issue.severity
+                        )} Severity
+                    </span>
 
-                    <div class="safety-detail">
-
-                        <span>📍</span>
-
-                        <div>
-
-                            <small>
-                                LOCATION
-                            </small>
-
-                            <strong>
-
-                                ${safeText(
-                                    issue.location ||
-                                    "Not available"
-                                )}
-
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="safety-detail">
-
-                        <span>👷</span>
-
-                        <div>
-
-                            <small>
-                                REPORTED BY
-                            </small>
-
-                            <strong>
-
-                                ${safeText(
-                                    issue.reported_by ||
-                                    "Not available"
-                                )}
-
-                            </strong>
-
-                        </div>
-
-                    </div>
-
-
-                    <div class="safety-detail">
-
-                        <span>📅</span>
-
-                        <div>
-
-                            <small>
-                                DATE
-                            </small>
-
-                            <strong>
-
-                                ${safeText(
-                                    issue.reported_date ||
-                                    "Not available"
-                                )}
-
-                            </strong>
-
-                        </div>
-
-                    </div>
-
+                    <span>
+                        ${safeText(
+                            issue.status
+                        )}
+                    </span>
 
                 </div>
 
 
-                <div class="safety-remarks">
-
-                    <strong>
-                        Remarks:
-                    </strong>
-
-                    ${safeText(
-                        issue.remarks ||
-                        "No remarks provided"
-                    )}
-
-                </div>
+                <button
+                    type="button"
+                    class="view-details-btn safety-details-btn"
+                >
+                    View Details
+                </button>
 
             </div>
 
         `;
 
 
-        item.style.cursor =
-            "pointer";
+        const detailsButton =
+            item.querySelector(
+                ".safety-details-btn"
+            );
 
 
-        item.addEventListener(
+        detailsButton.addEventListener(
             "click",
-            () => {
+            function() {
 
-                openCopilot();
-
-
-                setTimeout(
-                    () => {
-
-                        askCopilot(
-
-                            `Explain the safety issue "${issue.issue}" at ${issue.location}. It has ${issue.severity} severity and is currently ${issue.status}. What should be done?`
-
-                        );
-
-                    },
-                    300
+                showSafetyDetails(
+                    issue
                 );
 
             }
@@ -1147,10 +1535,244 @@ async function loadSafetyIssues() {
 
 
     console.log(
-        "Safety issues loaded successfully:",
-        data
+        "Safety issue cards displayed successfully."
+    );
+}
+
+
+// ==========================================================
+// SAFETY ISSUE DETAILS
+// ==========================================================
+
+function showSafetyDetails(
+    issue
+) {
+
+    const oldModal =
+        document.getElementById(
+            "safetyDetailsModal"
+        );
+
+
+    if (oldModal) {
+        oldModal.remove();
+    }
+
+
+    const modal =
+        document.createElement(
+            "div"
+        );
+
+
+    modal.id =
+        "safetyDetailsModal";
+
+    modal.className =
+        "details-modal-overlay";
+
+
+    modal.innerHTML = `
+
+        <div class="details-modal">
+
+            <button
+                type="button"
+                class="details-modal-close"
+                aria-label="Close"
+            >
+                ×
+            </button>
+
+
+            <div class="details-modal-header">
+
+                <span>
+                    SAFETY ISSUE
+                </span>
+
+                <h2>
+                    ${safeText(
+                        issue.issue
+                    )}
+                </h2>
+
+            </div>
+
+
+            <div class="details-modal-grid">
+
+                <div class="detail-item">
+
+                    <small>
+                        SEVERITY
+                    </small>
+
+                    <strong>
+                        ${safeText(
+                            issue.severity ||
+                            "Not available"
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <small>
+                        STATUS
+                    </small>
+
+                    <strong>
+                        ${safeText(
+                            issue.status ||
+                            "Not available"
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <small>
+                        LOCATION
+                    </small>
+
+                    <strong>
+                        ${safeText(
+                            issue.location ||
+                            "Not available"
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <small>
+                        REPORTED BY
+                    </small>
+
+                    <strong>
+                        ${safeText(
+                            issue.reported_by ||
+                            "Not available"
+                        )}
+                    </strong>
+
+                </div>
+
+
+                <div class="detail-item">
+
+                    <small>
+                        DATE
+                    </small>
+
+                    <strong>
+                        ${safeText(
+                            issue.reported_date ||
+                            "Not available"
+                        )}
+                    </strong>
+
+                </div>
+
+            </div>
+
+
+            <div class="detail-remarks">
+
+                <small>
+                    REMARKS
+                </small>
+
+                <p>
+                    ${safeText(
+                        issue.remarks ||
+                        "No remarks provided."
+                    )}
+                </p>
+
+            </div>
+
+
+            <button
+                type="button"
+                class="detail-ai-btn"
+            >
+                Ask AI Copilot About This Safety Issue
+            </button>
+
+        </div>
+
+    `;
+
+
+    document.body.appendChild(
+        modal
     );
 
+
+    const closeButton =
+        modal.querySelector(
+            ".details-modal-close"
+        );
+
+
+    closeButton.addEventListener(
+        "click",
+        function() {
+            modal.remove();
+        }
+    );
+
+
+    modal.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target === modal
+            ) {
+                modal.remove();
+            }
+
+        }
+    );
+
+
+    const aiButton =
+        modal.querySelector(
+            ".detail-ai-btn"
+        );
+
+
+    aiButton.addEventListener(
+        "click",
+        function() {
+
+            modal.remove();
+
+            openCopilot();
+
+
+            setTimeout(
+                function() {
+
+                    askCopilot(
+                        `Explain this construction site safety issue: "${issue.issue}". Severity: "${issue.severity || "not specified"}". Status: "${issue.status || "not specified"}". Location: "${issue.location || "not specified"}". Reported by: "${issue.reported_by || "not specified"}". Remarks: "${issue.remarks || "none"}". Give practical safety guidance.`
+                    );
+
+                },
+                300
+            );
+
+        }
+    );
 }
 
 
@@ -1163,19 +1785,15 @@ async function loadWorkers() {
     const {
         data,
         error
-    } =
-        await supabaseClient
-
-            .from("workers")
-
-            .select("*")
-
-            .order(
-                "id",
-                {
-                    ascending: true
-                }
-            );
+    } = await supabaseClient
+        .from("workers")
+        .select("*")
+        .order(
+            "id",
+            {
+                ascending: true
+            }
+        );
 
 
     if (error) {
@@ -1186,7 +1804,6 @@ async function loadWorkers() {
         );
 
         return;
-
     }
 
 
@@ -1207,7 +1824,6 @@ async function loadWorkers() {
         );
 
         return;
-
     }
 
 
@@ -1221,25 +1837,16 @@ async function loadWorkers() {
     ) {
 
         workersList.innerHTML = `
-
             <div class="empty-state">
-
                 No workers available.
-
             </div>
-
         `;
 
         return;
-
     }
 
 
     data.forEach(worker => {
-
-        const item =
-            document.createElement("div");
-
 
         const workerName =
             worker.name ||
@@ -1262,52 +1869,48 @@ async function loadWorkers() {
             "Unknown";
 
 
+        const item =
+            document.createElement(
+                "div"
+            );
+
+
         item.innerHTML = `
 
             <div class="worker-card">
 
                 <div class="worker-icon">
-                    👷
+                    Workforce
                 </div>
 
 
                 <div class="worker-info">
 
                     <h3>
-
                         ${safeText(
                             workerName
                         )}
-
                     </h3>
 
-
                     <p>
-
                         ${safeText(
                             workerRole
                         )}
-
                     </p>
 
-
                     <span>
-
                         ${safeText(
                             department
                         )}
-
                     </span>
 
                 </div>
 
 
                 <div class="worker-status">
-
                     ${safeText(
                         status
                     )}
-
                 </div>
 
             </div>
@@ -1321,18 +1924,16 @@ async function loadWorkers() {
 
         item.addEventListener(
             "click",
-            () => {
+            function() {
 
                 openCopilot();
 
 
                 setTimeout(
-                    () => {
+                    function() {
 
                         askCopilot(
-
-                            `Tell me about the workforce role "${workerRole}" and its importance on a construction site.`
-
+                            `Tell me about the worker "${workerName}", whose role is "${workerRole}" in the "${department}" department, and explain their role in construction site operations.`
                         );
 
                     },
@@ -1354,7 +1955,6 @@ async function loadWorkers() {
         "Workers loaded successfully:",
         data
     );
-
 }
 
 
@@ -1367,21 +1967,24 @@ async function loadEquipment() {
     const {
         data,
         error
-    } =
-        await supabaseClient
-
-            .from("equipment")
-
-            .select(
-                "id, equipment_name, equipment_type, status, location, last_maintenance_date, next_maintenance_date, remarks"
-            )
-
-            .order(
-                "id",
-                {
-                    ascending: true
-                }
-            );
+    } = await supabaseClient
+        .from("equipment")
+        .select(`
+            id,
+            equipment_name,
+            equipment_type,
+            status,
+            location,
+            last_maintenance_date,
+            next_maintenance_date,
+            remarks
+        `)
+        .order(
+            "id",
+            {
+                ascending: true
+            }
+        );
 
 
     if (error) {
@@ -1392,7 +1995,6 @@ async function loadEquipment() {
         );
 
         return;
-
     }
 
 
@@ -1413,7 +2015,6 @@ async function loadEquipment() {
         );
 
         return;
-
     }
 
 
@@ -1427,24 +2028,21 @@ async function loadEquipment() {
     ) {
 
         equipmentList.innerHTML = `
-
             <div class="empty-state">
-
                 No equipment records available.
-
             </div>
-
         `;
 
         return;
-
     }
 
 
     data.forEach(equipment => {
 
         const item =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
 
         item.innerHTML = `
@@ -1452,49 +2050,39 @@ async function loadEquipment() {
             <div class="equipment-card">
 
                 <div class="equipment-icon">
-                    ⚙️
+                    Equipment
                 </div>
 
 
                 <div class="equipment-info">
 
                     <h3>
-
                         ${safeText(
                             equipment.equipment_name
                         )}
-
                     </h3>
 
-
                     <p>
-
                         ${safeText(
                             equipment.equipment_type
                         )}
-
                     </p>
 
-
                     <p>
-
-                        📍
+                        Location:
                         ${safeText(
                             equipment.location ||
                             "Main Site"
                         )}
-
                     </p>
 
                 </div>
 
 
                 <div class="equipment-status">
-
                     ${safeText(
                         equipment.status
                     )}
-
                 </div>
 
             </div>
@@ -1508,18 +2096,16 @@ async function loadEquipment() {
 
         item.addEventListener(
             "click",
-            () => {
+            function() {
 
                 openCopilot();
 
 
                 setTimeout(
-                    () => {
+                    function() {
 
                         askCopilot(
-
-                            `Give me the maintenance and operational information for ${equipment.equipment_name}.`
-
+                            `Give me the current operational and maintenance information for ${equipment.equipment_name}. Its type is ${equipment.equipment_type}, its status is ${equipment.status}, its location is ${equipment.location || "the main site"}, and its next maintenance date is ${equipment.next_maintenance_date || "not specified"}.`
                         );
 
                     },
@@ -1541,12 +2127,11 @@ async function loadEquipment() {
         "Equipment loaded successfully:",
         data
     );
-
 }
 
 
 // ==========================================================
-// MAINTENANCE ALERTS
+// MAINTENANCE
 // ==========================================================
 
 async function loadMaintenanceAlerts() {
@@ -1554,14 +2139,12 @@ async function loadMaintenanceAlerts() {
     const {
         data,
         error
-    } =
-        await supabaseClient
-
-            .from("equipment")
-
-            .select(
-                "equipment_name, next_maintenance_date"
-            );
+    } = await supabaseClient
+        .from("equipment")
+        .select(`
+            equipment_name,
+            next_maintenance_date
+        `);
 
 
     if (error) {
@@ -1572,7 +2155,6 @@ async function loadMaintenanceAlerts() {
         );
 
         return;
-
     }
 
 
@@ -1593,7 +2175,6 @@ async function loadMaintenanceAlerts() {
         );
 
         return;
-
     }
 
 
@@ -1603,7 +2184,6 @@ async function loadMaintenanceAlerts() {
 
     const today =
         new Date();
-
 
     today.setHours(
         0,
@@ -1618,9 +2198,7 @@ async function loadMaintenanceAlerts() {
         if (
             !equipment.next_maintenance_date
         ) {
-
             return;
-
         }
 
 
@@ -1633,31 +2211,24 @@ async function loadMaintenanceAlerts() {
 
         const difference =
             Math.ceil(
-
                 (
                     maintenanceDate -
                     today
                 ) /
-
                 (
                     1000 *
                     60 *
                     60 *
                     24
                 )
-
             );
 
 
         let message;
-
-        let statusClass =
-            "";
+        let statusClass;
 
 
-        if (
-            difference < 0
-        ) {
+        if (difference < 0) {
 
             message =
                 "Maintenance Due";
@@ -1666,6 +2237,7 @@ async function loadMaintenanceAlerts() {
                 "maintenance-due";
 
         }
+
 
         else if (
             difference <= 7
@@ -1679,6 +2251,7 @@ async function loadMaintenanceAlerts() {
 
         }
 
+
         else {
 
             message =
@@ -1686,12 +2259,13 @@ async function loadMaintenanceAlerts() {
 
             statusClass =
                 "maintenance-ok";
-
         }
 
 
         const item =
-            document.createElement("div");
+            document.createElement(
+                "div"
+            );
 
 
         item.innerHTML = `
@@ -1699,38 +2273,31 @@ async function loadMaintenanceAlerts() {
             <div class="maintenance-card">
 
                 <div class="maintenance-icon">
-                    🔧
+                    Maintenance
                 </div>
 
 
                 <div class="maintenance-info">
 
                     <strong>
-
                         ${safeText(
                             equipment.equipment_name
                         )}
-
                     </strong>
-
 
                     <span
                         class="${statusClass}"
                     >
-
-                        ${message}
-
+                        ${safeText(
+                            message
+                        )}
                     </span>
 
-
                     <small>
-
                         Next Maintenance:
-
                         ${safeText(
                             equipment.next_maintenance_date
                         )}
-
                     </small>
 
                 </div>
@@ -1746,18 +2313,16 @@ async function loadMaintenanceAlerts() {
 
         item.addEventListener(
             "click",
-            () => {
+            function() {
 
                 openCopilot();
 
 
                 setTimeout(
-                    () => {
+                    function() {
 
                         askCopilot(
-
-                            `What should be checked before the next maintenance of ${equipment.equipment_name}?`
-
+                            `What should be checked before the next maintenance of ${equipment.equipment_name}? The scheduled maintenance date is ${equipment.next_maintenance_date}.`
                         );
 
                     },
@@ -1779,7 +2344,6 @@ async function loadMaintenanceAlerts() {
         "Maintenance alerts loaded successfully:",
         data
     );
-
 }
 
 
@@ -1790,102 +2354,38 @@ async function loadMaintenanceAlerts() {
 async function loadDashboard() {
 
     const [
-
         projectResult,
-
         workersResult,
-
         equipmentResult,
-
         safetyResult
-
     ] = await Promise.all([
 
-
         supabaseClient
-
             .from("projects")
-
             .select(
                 "id, overall_progress"
             )
-
             .limit(1)
-
             .single(),
 
 
         supabaseClient
-
             .from("workers")
-
             .select("id"),
 
 
         supabaseClient
-
             .from("equipment")
-
             .select("id"),
 
 
         supabaseClient
-
             .from("safety_issues")
-
             .select(
                 "id, status"
             )
 
     ]);
-
-
-    if (
-        projectResult.error
-    ) {
-
-        console.error(
-            "Dashboard project error:",
-            projectResult.error
-        );
-
-    }
-
-
-    if (
-        workersResult.error
-    ) {
-
-        console.error(
-            "Dashboard workers error:",
-            workersResult.error
-        );
-
-    }
-
-
-    if (
-        equipmentResult.error
-    ) {
-
-        console.error(
-            "Dashboard equipment error:",
-            equipmentResult.error
-        );
-
-    }
-
-
-    if (
-        safetyResult.error
-    ) {
-
-        console.error(
-            "Dashboard safety error:",
-            safetyResult.error
-        );
-
-    }
 
 
     const totalWorkers =
@@ -1902,25 +2402,19 @@ async function loadDashboard() {
 
     const openSafetyIssues =
         safetyResult.data
-
             ? safetyResult.data.filter(
                 issue =>
                     issue.status ===
                     "Open"
             ).length
-
             : 0;
 
 
     const overallProgress =
         projectResult.data
-
-            ? (
-                projectResult.data
-                    .overall_progress ??
-                0
-            )
-
+            ? Number(
+                projectResult.data.overall_progress
+            ) || 0
             : 0;
 
 
@@ -1970,14 +2464,9 @@ async function loadDashboard() {
     if (progressFill) {
 
         progressFill.style.width =
-            Math.min(
-                Math.max(
-                    overallProgress,
-                    0
-                ),
-                100
+            clampProgress(
+                overallProgress
             ) + "%";
-
     }
 
 
@@ -1991,7 +2480,6 @@ async function loadDashboard() {
 
         systemStatus.textContent =
             "Connected";
-
     }
 
 
@@ -1999,20 +2487,23 @@ async function loadDashboard() {
         "Dashboard loaded successfully:",
         siteData.dashboard
     );
-
 }
+
+
 // ==========================================================
-// SAFETY DASHBOARD STATISTICS
+// SAFETY DASHBOARD
 // ==========================================================
 
 async function loadSafetyDashboard() {
 
-    const { data, error } =
-        await supabaseClient
-            .from("safety_issues")
-            .select(
-                "status, severity"
-            );
+    const {
+        data,
+        error
+    } = await supabaseClient
+        .from("safety_issues")
+        .select(
+            "status, severity"
+        );
 
 
     if (error) {
@@ -2033,21 +2524,24 @@ async function loadSafetyDashboard() {
     const openIssues =
         data.filter(
             issue =>
-                issue.status === "Open"
+                issue.status ===
+                "Open"
         ).length;
 
 
     const resolvedIssues =
         data.filter(
             issue =>
-                issue.status === "Resolved"
+                issue.status ===
+                "Resolved"
         ).length;
 
 
     const highSeverityIssues =
         data.filter(
             issue =>
-                issue.severity === "High"
+                issue.severity ===
+                "High"
         ).length;
 
 
@@ -2092,7 +2586,6 @@ async function loadSafetyDashboard() {
         "Safety dashboard loaded successfully:",
         siteData.safetyDashboard
     );
-
 }
 
 
@@ -2122,7 +2615,6 @@ function openCopilot() {
         );
 
         return;
-
     }
 
 
@@ -2130,27 +2622,31 @@ function openCopilot() {
         "active"
     );
 
+
     overlay.style.display =
         "flex";
 
 
-    setTimeout(() => {
+    setTimeout(
+        function() {
 
-        const input =
-            document.getElementById(
-                "chatInput"
-            );
+            const input =
+                document.getElementById(
+                    "copilotInput"
+                ) ||
+                document.getElementById(
+                    "chatInput"
+                );
 
-        if (input) {
 
-            input.focus();
+            if (input) {
+                input.focus();
+            }
 
-        }
-
-    }, 100);
-
+        },
+        150
+    );
 }
-
 
 window.openCopilot =
     openCopilot;
@@ -2169,9 +2665,7 @@ function closeCopilot() {
 
 
     if (!overlay) {
-
         return;
-
     }
 
 
@@ -2182,9 +2676,7 @@ function closeCopilot() {
 
     overlay.style.display =
         "none";
-
 }
-
 
 window.closeCopilot =
     closeCopilot;
@@ -2207,8 +2699,11 @@ function addChatMessage(
 
     if (!chatMessages) {
 
-        return;
+        console.warn(
+            "chatMessages not found"
+        );
 
+        return;
     }
 
 
@@ -2234,7 +2729,9 @@ function addChatMessage(
         "chat-message-content";
 
 
-    if (sender === "bot") {
+    if (
+        sender === "bot"
+    ) {
 
         messageContent.innerHTML =
             safeText(message)
@@ -2247,7 +2744,6 @@ function addChatMessage(
 
         messageContent.textContent =
             message;
-
     }
 
 
@@ -2263,7 +2759,6 @@ function addChatMessage(
 
     chatMessages.scrollTop =
         chatMessages.scrollHeight;
-
 }
 
 
@@ -2280,10 +2775,11 @@ function showTyping() {
 
 
     if (!chatMessages) {
-
         return;
-
     }
+
+
+    hideTyping();
 
 
     const typing =
@@ -2301,15 +2797,9 @@ function showTyping() {
 
 
     typing.innerHTML = `
-
         <div class="chat-message-content">
-
-            <span>
-                AI Copilot is thinking...
-            </span>
-
+            AI Copilot is thinking...
         </div>
-
     `;
 
 
@@ -2320,7 +2810,6 @@ function showTyping() {
 
     chatMessages.scrollTop =
         chatMessages.scrollHeight;
-
 }
 
 
@@ -2333,16 +2822,13 @@ function hideTyping() {
 
 
     if (typing) {
-
         typing.remove();
-
     }
-
 }
 
 
 // ==========================================================
-// LOCAL FALLBACK AI
+// LOCAL FALLBACK
 // ==========================================================
 
 function localCopilotAnswer(
@@ -2350,7 +2836,7 @@ function localCopilotAnswer(
 ) {
 
     const q =
-        question
+        String(question)
             .toLowerCase()
             .trim();
 
@@ -2358,48 +2844,40 @@ function localCopilotAnswer(
     // PROJECT
     if (
         q.includes("project") ||
-        q.includes("site name")
+        q.includes("site name") ||
+        q.includes("location")
     ) {
 
         if (siteData.project) {
 
             return `
+The current project is "${siteData.project.project_name}".
 
-The current project is
-${siteData.project.project_name},
-located at
-${siteData.project.location}.
+Location:
+${siteData.project.location || "Not specified"}.
 
-The current project status is
-${siteData.project.status || "not specified"}.
+Project status:
+${siteData.project.status || "Active"}.
 
+Overall progress:
+${siteData.dashboard.overallProgress || 0}%.
             `.trim();
-
         }
-
     }
 
 
-    // PROGRESS
+    // OVERALL PROGRESS
     if (
         q.includes("progress") ||
-        q.includes("percentage") ||
-        q.includes("completion")
+        q.includes("completion") ||
+        q.includes("percentage")
     ) {
 
-        const progress =
-            siteData.dashboard
-                .overallProgress;
-
-
         return `
+The current overall construction progress is ${siteData.dashboard.overallProgress || 0}%.
 
-The current overall construction progress is ${progress}%.
-
-You can open the Progress Tracking section to view individual construction activities and their completion percentages.
-
+The individual construction activities can be viewed in the Progress section.
         `.trim();
-
     }
 
 
@@ -2411,30 +2889,26 @@ You can open the Progress Tracking section to view individual construction activ
     ) {
 
         const safety =
-            siteData.safetyDashboard;
+            siteData.safetyDashboard ||
+            {};
 
 
         return `
+The site currently has ${safety.totalIssues || 0} recorded safety issues.
 
-The site currently has
-${safety.totalIssues || 0}
-recorded safety issues.
-
+Open issues:
 ${safety.openIssues || 0}
-are open and
+
+Resolved issues:
 ${safety.resolvedIssues || 0}
-are resolved.
 
-There are
-${safety.highSeverityIssues || 0}
-high-severity issues.
-
+High-severity issues:
+${safety.highSeverityIssues || 0}.
         `.trim();
-
     }
 
 
-    // WORKERS
+    // WORKFORCE
     if (
         q.includes("worker") ||
         q.includes("workforce") ||
@@ -2442,13 +2916,8 @@ high-severity issues.
     ) {
 
         return `
-
-There are currently
-${siteData.dashboard.totalWorkers || 0}
-workers recorded in the construction management system.
-
+There are currently ${siteData.dashboard.totalWorkers || 0} workers recorded in the construction management system.
         `.trim();
-
     }
 
 
@@ -2457,19 +2926,30 @@ workers recorded in the construction management system.
         q.includes("equipment") ||
         q.includes("machine") ||
         q.includes("crane") ||
-        q.includes("excavator")
+        q.includes("excavator") ||
+        q.includes("mixer") ||
+        q.includes("generator")
     ) {
 
+        const equipment =
+            siteData.equipment ||
+            [];
+
+
+        const details =
+            equipment
+                .map(
+                    item =>
+                        `${item.equipment_name}: ${item.status}, location ${item.location || "not specified"}`
+                )
+                .join("\n");
+
+
         return `
+There are ${equipment.length} equipment records.
 
-There are currently
-${siteData.dashboard.totalEquipment || 0}
-equipment records in the system.
-
-Open the Equipment section for individual equipment details and maintenance information.
-
+${details}
         `.trim();
-
     }
 
 
@@ -2479,14 +2959,25 @@ Open the Equipment section for individual equipment details and maintenance info
         q.includes("service")
     ) {
 
+        const maintenance =
+            siteData.maintenance ||
+            [];
+
+
+        const details =
+            maintenance
+                .map(
+                    item =>
+                        `${item.equipment_name}: next maintenance ${item.next_maintenance_date || "not specified"}`
+                )
+                .join("\n");
+
+
         return `
+Current equipment maintenance information:
 
-The system tracks the next maintenance date for construction equipment.
-
-Open the Maintenance Alerts section to see equipment requiring attention.
-
+${details}
         `.trim();
-
     }
 
 
@@ -2497,13 +2988,10 @@ Open the Maintenance Alerts section to see equipment requiring attention.
     ) {
 
         return `
+Concrete quality depends on the approved mix design, batching, placement, compaction and curing.
 
-Concrete quality depends on proper mix design, batching, placement, compaction and curing.
-
-On an actual construction site, follow the approved mix design, method statement and project specifications.
-
+On the actual construction site, always follow the approved method statement, project specifications and quality-control requirements.
         `.trim();
-
     }
 
 
@@ -2513,32 +3001,26 @@ On an actual construction site, follow the approved mix design, method statement
     ) {
 
         return `
-
 A foundation transfers structural loads safely to the ground.
 
-Common foundation types include isolated footings, combined footings, raft foundations and piles.
+Common foundation types include isolated footings, combined footings, raft foundations and pile foundations.
 
-The correct type depends on structural requirements and soil conditions.
-
+The correct foundation depends on structural requirements and site soil conditions.
         `.trim();
-
     }
 
 
     // HELMET
     if (
-        q.includes("safety helmet") ||
-        q.includes("helmet")
+        q.includes("helmet") ||
+        q.includes("ppe")
     ) {
 
         return `
+Safety helmets are important PPE on construction sites because they help protect workers from impact and falling-object hazards.
 
-Safety helmets are essential PPE on construction sites because they help protect workers from falling objects and impact hazards.
-
-Workers should follow the site's approved PPE requirements at all times.
-
+Workers should follow the approved site PPE requirements at all times.
         `.trim();
-
     }
 
 
@@ -2549,33 +3031,27 @@ Workers should follow the site's approved PPE requirements at all times.
     ) {
 
         return `
-
 Scaffolding should be erected, inspected and used according to the approved method and applicable safety requirements.
 
-Important checks include stability, access, guardrails, platforms and load capacity.
-
+Important checks include stability, safe access, guardrails, platforms and load capacity.
         `.trim();
-
     }
 
 
-    // DEFAULT
     return `
+I can help with the Smart Construction Site project.
 
-I can help with construction management, site progress, safety, workforce, equipment, maintenance and general construction questions.
-
-For site-specific information, ask me things such as:
+You can ask me:
 
 • What is the current project progress?
 • What safety issues are open?
 • How many workers are on site?
+• What equipment is available?
 • Which equipment needs maintenance?
 • What activities are currently in progress?
-
-For general construction questions, you can ask about concrete, foundations, scaffolding, PPE, project management, construction safety and more.
-
+• Tell me about the concrete pouring activity.
+• What is the status of the excavator?
     `.trim();
-
 }
 
 
@@ -2588,22 +3064,21 @@ async function askCopilot(
 ) {
 
     if (!question) {
-
         return;
-
     }
 
 
     const input =
+        document.getElementById(
+            "copilotInput"
+        ) ||
         document.getElementById(
             "chatInput"
         );
 
 
     if (input) {
-
         input.value = "";
-
     }
 
 
@@ -2614,11 +3089,8 @@ async function askCopilot(
 
 
     chatHistory.push({
-
         role: "user",
-
         content: question
-
     });
 
 
@@ -2627,17 +3099,12 @@ async function askCopilot(
 
     try {
 
-        // ==================================================
-        // SEND QUESTION TO SUPABASE EDGE FUNCTION
-        // ==================================================
-
         const response =
             await supabaseClient
                 .functions
                 .invoke(
                     "construction-copilot",
                     {
-
                         body: {
 
                             message:
@@ -2680,7 +3147,6 @@ async function askCopilot(
                             }
 
                         }
-
                     }
                 );
 
@@ -2694,7 +3160,8 @@ async function askCopilot(
         ) {
 
             console.warn(
-                "AI Edge Function unavailable. Using local fallback."
+                "AI Edge Function unavailable. Using local fallback.",
+                response.error
             );
 
 
@@ -2711,16 +3178,12 @@ async function askCopilot(
 
 
             chatHistory.push({
-
                 role: "assistant",
-
                 content: fallback
-
             });
 
 
             return;
-
         }
 
 
@@ -2739,15 +3202,14 @@ async function askCopilot(
 
 
         chatHistory.push({
-
             role: "assistant",
-
             content: answer
-
         });
 
+    }
 
-    } catch (error) {
+
+    catch (error) {
 
         console.error(
             "Copilot error:",
@@ -2771,17 +3233,11 @@ async function askCopilot(
 
 
         chatHistory.push({
-
             role: "assistant",
-
             content: fallback
-
         });
-
     }
-
 }
-
 
 window.askCopilot =
     askCopilot;
@@ -2795,11 +3251,17 @@ function setupChat() {
 
     const chatForm =
         document.getElementById(
+            "copilotChatForm"
+        ) ||
+        document.getElementById(
             "chatForm"
         );
 
 
     const chatInput =
+        document.getElementById(
+            "copilotInput"
+        ) ||
         document.getElementById(
             "chatInput"
         );
@@ -2808,12 +3270,35 @@ function setupChat() {
     if (!chatForm) {
 
         console.warn(
-            "chatForm not found"
+            "Copilot chat form not found."
         );
 
         return;
-
     }
+
+
+    if (!chatInput) {
+
+        console.warn(
+            "Copilot input not found."
+        );
+
+        return;
+    }
+
+
+    // Prevent duplicate listeners
+    if (
+        chatForm.dataset.chatReady ===
+        "true"
+    ) {
+
+        return;
+    }
+
+
+    chatForm.dataset.chatReady =
+        "true";
 
 
     chatForm.addEventListener(
@@ -2823,21 +3308,12 @@ function setupChat() {
             event.preventDefault();
 
 
-            if (!chatInput) {
-
-                return;
-
-            }
-
-
             const question =
                 chatInput.value.trim();
 
 
             if (!question) {
-
                 return;
-
             }
 
 
@@ -2847,12 +3323,11 @@ function setupChat() {
 
         }
     );
-
 }
 
 
 // ==========================================================
-// CLOSE COPILOT WHEN CLICKING OUTSIDE
+// COPILOT OVERLAY
 // ==========================================================
 
 function setupCopilotOverlay() {
@@ -2864,9 +3339,7 @@ function setupCopilotOverlay() {
 
 
     if (!overlay) {
-
         return;
-
     }
 
 
@@ -2875,8 +3348,7 @@ function setupCopilotOverlay() {
         function(event) {
 
             if (
-                event.target ===
-                overlay
+                event.target === overlay
             ) {
 
                 closeCopilot();
@@ -2885,12 +3357,11 @@ function setupCopilotOverlay() {
 
         }
     );
-
 }
 
 
 // ==========================================================
-// NAVIGATION LINKS
+// NAVIGATION
 // ==========================================================
 
 function setupNavigation() {
@@ -2930,12 +3401,95 @@ function setupNavigation() {
 
         }
     );
-
 }
 
 
 // ==========================================================
-// INITIALIZE EVERYTHING
+// DASHBOARD ACTIONS
+// ==========================================================
+
+function setupDashboardActions() {
+
+    // Explore Dashboard
+    const exploreButtons =
+        document.querySelectorAll(
+            ".explore-dashboard, [data-action='dashboard']"
+        );
+
+
+    exploreButtons.forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                function(event) {
+
+                    event.preventDefault();
+
+                    scrollToSection(
+                        "dashboard"
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    // AI Copilot
+    const aiButtons =
+        document.querySelectorAll(
+            ".ask-ai-copilot, [data-action='copilot']"
+        );
+
+
+    aiButtons.forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                function(event) {
+
+                    event.preventDefault();
+
+                    openCopilot();
+
+                }
+            );
+
+        }
+    );
+
+
+    // Check Site Status
+    const statusButtons =
+        document.querySelectorAll(
+            ".check-site-status, [data-action='site-status']"
+        );
+
+
+    statusButtons.forEach(
+        button => {
+
+            button.addEventListener(
+                "click",
+                function(event) {
+
+                    event.preventDefault();
+
+                    showMessage();
+
+                }
+            );
+
+        }
+    );
+}
+
+
+// ==========================================================
+// INITIALIZE SITE
 // ==========================================================
 
 async function initializeSite() {
@@ -2950,6 +3504,8 @@ async function initializeSite() {
     setupCopilotOverlay();
 
     setupNavigation();
+
+    setupDashboardActions();
 
 
     await Promise.all([
@@ -2978,7 +3534,6 @@ async function initializeSite() {
     console.log(
         "Smart Construction Site loaded successfully."
     );
-
 }
 
 
@@ -2996,9 +3551,15 @@ if (
         initializeSite
     );
 
-} else {
+}
+
+else {
 
     initializeSite();
 
 }
-console.log("SCRIPT.JS IS RUNNING");
+
+
+console.log(
+    "SCRIPT.JS IS RUNNING"
+);
