@@ -39,8 +39,37 @@ const siteData = {
     dashboard: {},
     safetyDashboard: {}
 };
+// ==========================================================
+// SELECTED PROJECT
+// ==========================================================
 
+let selectedProjectId = 3;
 
+// Change the selected project
+async function changeProject(projectId) {
+
+    selectedProjectId = Number(projectId);
+
+    console.log(
+        "Selected project ID:",
+        selectedProjectId
+    );
+
+    await loadProject();
+    await loadProgress();
+    await loadDailyActivities();
+    await loadSafetyIssues();
+    await loadWorkers();
+    await loadEquipment();
+    await loadMaintenanceAlerts();
+    await loadDashboard();
+    await loadSafetyDashboard();
+
+    console.log(
+        "Project data refreshed successfully for project:",
+        selectedProjectId
+    );
+}
 // ==========================================================
 // GENERAL HELPERS
 // ==========================================================
@@ -144,65 +173,33 @@ window.scrollToSection =
 
 function showMessage() {
 
-    const messageElement =
-        document.getElementById("message");
-
-    if (!messageElement) {
-
-        console.warn(
-            "Check Site Status: #message element not found."
-        );
-
-        return;
-    }
-
-
     const dashboard =
         siteData.dashboard || {};
 
     const safety =
         siteData.safetyDashboard || {};
 
-
     const overallProgress =
-        Number(
-            dashboard.overallProgress
-        ) || 0;
-
+        Number(dashboard.overallProgress) || 0;
 
     const openSafety =
-        Number(
-            safety.openIssues
-        ) || 0;
-
+        Number(safety.openIssues) || 0;
 
     const highSafety =
-        Number(
-            safety.highSeverityIssues
-        ) || 0;
-
+        Number(safety.highSeverityIssues) || 0;
 
     const totalWorkers =
-        Number(
-            dashboard.totalWorkers
-        ) || 0;
-
+        Number(dashboard.totalWorkers) || 0;
 
     const totalEquipment =
-        Number(
-            dashboard.totalEquipment
-        ) || 0;
+        Number(dashboard.totalEquipment) || 0;
 
 
-    // Count maintenance items due today
-    // or already overdue.
     const maintenanceDue =
         (siteData.maintenance || [])
             .filter(item => {
 
-                if (
-                    !item.next_maintenance_date
-                ) {
+                if (!item.next_maintenance_date) {
                     return false;
                 }
 
@@ -222,9 +219,8 @@ function showMessage() {
                     0
                 );
 
-                return (
-                    maintenanceDate <= today
-                );
+                return maintenanceDate <= today;
+
             })
             .length;
 
@@ -233,32 +229,23 @@ function showMessage() {
     let statusText;
 
 
-    // HIGH SAFETY ISSUE
     if (highSafety > 0) {
 
         statusTitle =
             "SITE STATUS: ATTENTION REQUIRED";
 
         statusText =
-            `There ${
-                highSafety === 1
-                    ? "is"
-                    : "are"
-            } ${highSafety} high-severity safety issue${
-                highSafety === 1
-                    ? ""
-                    : "s"
-            } currently recorded on the site. ${
-                openSafety
-            } safety issue${
-                openSafety === 1
-                    ? ""
-                    : "s"
-            } remain open. Immediate safety review is recommended.`;
+            highSafety +
+            " high-severity safety issue" +
+            (highSafety === 1 ? "" : "s") +
+            " currently recorded. " +
+            openSafety +
+            " safety issue" +
+            (openSafety === 1 ? "" : "s") +
+            " remain open. Immediate safety review is recommended.";
+
     }
 
-
-    // OPEN SAFETY OR MAINTENANCE
     else if (
         openSafety > 0 ||
         maintenanceDue > 0
@@ -268,86 +255,159 @@ function showMessage() {
             "SITE STATUS: MONITOR";
 
         statusText =
-            `The project is currently ${overallProgress}% complete. ${
-                openSafety === 1
-                    ? "There is"
-                    : `There are ${openSafety}`
-            } ${
-                openSafety === 1
-                    ? "1 open safety issue."
-                    : "open safety issues."
-            } ${
-                maintenanceDue
-            } equipment item${
-                maintenanceDue === 1
-                    ? " is"
-                    : "s are"
-            } due for maintenance. The site should continue to be monitored.`;
+            "The project is currently " +
+            overallProgress +
+            "% complete. " +
+            openSafety +
+            " open safety issue" +
+            (openSafety === 1 ? "" : "s") +
+            " and " +
+            maintenanceDue +
+            " equipment item" +
+            (maintenanceDue === 1 ? " is" : "s are") +
+            " due for maintenance.";
+
     }
 
-
-    // NORMAL
     else {
 
         statusTitle =
             "SITE STATUS: OPERATIONAL";
 
         statusText =
-            `The project is currently ${overallProgress}% complete. No open safety issues or overdue maintenance items were detected. The site is operating normally.`;
+            "The project is currently " +
+            overallProgress +
+            "% complete. " +
+            "No open safety issues or overdue maintenance items were detected. " +
+            "The site is operating normally.";
+
     }
 
 
-    messageElement.innerHTML = `
+    const oldModal =
+        document.getElementById(
+            "siteStatusModal"
+        );
 
-        <div class="site-status-result">
-
-            <strong>
-                ${safeText(statusTitle)}
-            </strong>
-
-            <p>
-                ${safeText(statusText)}
-            </p>
-
-            <div class="site-status-details">
-
-                <span>
-                    Progress: ${overallProgress}%
-                </span>
-
-                <span>
-                    Workers: ${totalWorkers}
-                </span>
-
-                <span>
-                    Equipment: ${totalEquipment}
-                </span>
-
-                <span>
-                    Open Safety Issues: ${openSafety}
-                </span>
-
-            </div>
-
-        </div>
-
-    `;
+    if (oldModal) {
+        oldModal.remove();
+    }
 
 
-    messageElement.scrollIntoView({
-        behavior: "smooth",
-        block: "center"
-    });
+    const modal =
+        document.createElement("div");
+
+    modal.id =
+        "siteStatusModal";
+
+    modal.style.cssText =
+        "position:fixed;" +
+        "inset:0;" +
+        "background:rgba(0,0,0,0.55);" +
+        "display:flex;" +
+        "align-items:center;" +
+        "justify-content:center;" +
+        "z-index:9999;" +
+        "padding:20px;";
+
+
+    modal.innerHTML =
+        "<div style=\"" +
+        "background:white;" +
+        "width:min(520px,100%);" +
+        "border-radius:18px;" +
+        "padding:28px;" +
+        "box-shadow:0 20px 60px rgba(0,0,0,0.3);" +
+        "position:relative;\">" +
+
+        "<button id=\"closeSiteStatus\" " +
+        "style=\"" +
+        "position:absolute;" +
+        "top:12px;" +
+        "right:15px;" +
+        "border:none;" +
+        "background:transparent;" +
+        "font-size:24px;" +
+        "cursor:pointer;\">" +
+        "×" +
+        "</button>" +
+
+        "<h2 style=\"margin-top:0;color:#12395b;\">" +
+        "Site Status" +
+        "</h2>" +
+
+        "<h3>" +
+        safeText(statusTitle) +
+        "</h3>" +
+
+        "<p style=\"line-height:1.6;\">" +
+        safeText(statusText) +
+        "</p>" +
+
+        "<div style=\"" +
+        "display:grid;" +
+        "grid-template-columns:1fr 1fr;" +
+        "gap:12px;" +
+        "margin-top:20px;\">" +
+
+        "<div><strong>Progress</strong><br>" +
+        overallProgress +
+        "%</div>" +
+
+        "<div><strong>Workers</strong><br>" +
+        totalWorkers +
+        "</div>" +
+
+        "<div><strong>Equipment</strong><br>" +
+        totalEquipment +
+        "</div>" +
+
+        "<div><strong>Open Safety Issues</strong><br>" +
+        openSafety +
+        "</div>" +
+
+        "</div>" +
+
+        "</div>";
+
+
+    document.body.appendChild(
+        modal
+    );
+
+
+    const closeButton =
+        document.getElementById(
+            "closeSiteStatus"
+        );
+
+    closeButton.addEventListener(
+        "click",
+        function() {
+            modal.remove();
+        }
+    );
+
+
+    modal.addEventListener(
+        "click",
+        function(event) {
+
+            if (
+                event.target === modal
+            ) {
+                modal.remove();
+            }
+
+        }
+    );
+
 }
-
-window.showMessage =
-    showMessage;
 
 
 // ==========================================================
 // PROJECT
 // ==========================================================
-
 async function loadProject() {
 
     const {
@@ -356,55 +416,41 @@ async function loadProject() {
     } = await supabaseClient
         .from("projects")
         .select("*")
-        .order(
-            "created_at",
-            {
-                ascending: false
-            }
-        )
-        .limit(1)
+        .eq("id", selectedProjectId)
         .single();
-
 
     if (error) {
 
         console.error(
-            "Error loading project:",
+            "Error loading selected project:",
             error
         );
 
         return;
     }
 
-
-    siteData.project =
-        data;
-
+    siteData.project = data;
 
     setText(
         "projectName",
         data.project_name
     );
 
-
     setText(
         "projectLocation",
         data.location
     );
-
 
     setText(
         "projectStatus",
         data.status || "Active"
     );
 
-
     console.log(
-        "Project loaded successfully:",
+        "Selected project loaded successfully:",
         data
     );
 }
-
 
 // ==========================================================
 // CONSTRUCTION PROGRESS
@@ -412,28 +458,29 @@ async function loadProject() {
 
 async function loadProgress() {
 
+    const projectId = siteData.project?.id;
+
+    if (!projectId) {
+        console.warn("No project selected.");
+        return;
+    }
+
     const {
         data,
         error
-    } = await supabaseClient
-        .from("activities")
-        .select(`
-            id,
-            activity_name,
-            progress,
-            status,
-            activity_date,
-            location,
-            workers_count,
-            remarks
-        `)
-        .order(
-            "id",
-            {
-                ascending: true
-            }
-        );
-
+    } = await supabaseClient    .from("activities")
+    .select(`
+        id,
+        activity_name,
+        progress,
+        status,
+        activity_date,
+        location,
+        workers_count,
+        remarks
+    `)
+    .eq("project_id", projectId)
+    .order("id", { ascending: true });
 
     if (error) {
 
@@ -840,20 +887,20 @@ async function loadDailyActivities() {
             workers_count,
             remarks
         `)
-        .order(
-            "activity_date",
-            {
-                ascending: false
-            }
-        )
-        .order(
-            "id",
-            {
-                ascending: false
-            }
-        )
-        .limit(3);
-
+       .eq("project_id", siteData.project.id)
+.order(
+    "activity_date",
+    {
+        ascending: false
+    }
+)
+.order(
+    "id",
+    {
+        ascending: false
+    }
+)
+.limit(3);
 
     if (error) {
 
@@ -1311,19 +1358,19 @@ async function loadSafetyIssues() {
             reported_date,
             remarks
         `)
-        .order(
-            "reported_date",
-            {
-                ascending: false
-            }
-        )
-        .order(
-            "id",
-            {
-                ascending: false
-            }
-        );
-
+      .eq("project_id", selectedProjectId)
+.order(
+    "reported_date",
+    {
+        ascending: false
+    }
+)
+.order(
+    "id",
+    {
+        ascending: false
+    }
+);
 
     if (error) {
 
@@ -1413,27 +1460,60 @@ async function loadSafetyIssues() {
 
 
         let statusClass =
-            "safety-status-badge";
+    "safety-status-badge";
+
+if (
+    issue.status ===
+    "Open"
+) {
+
+    statusClass +=
+        " open";
+
+} else if (
+    issue.status ===
+    "Resolved"
+) {
+
+    statusClass +=
+        " resolved";
+}
 
 
-        if (
-            issue.status ===
-            "Open"
-        ) {
+/* Meaningful action label */
+let actionLabel = "Monitor";
 
-            statusClass +=
-                " open";
+if (
+    issue.status === "Open" &&
+    issue.severity === "High"
+) {
 
-        } else if (
-            issue.status ===
-            "Resolved"
-        ) {
+    actionLabel =
+        "Critical Attention Required";
 
-            statusClass +=
-                " resolved";
-        }
+} else if (
+    issue.status === "Open" &&
+    issue.severity === "Medium"
+) {
 
+    actionLabel =
+        "Action Required";
 
+} else if (
+    issue.status === "Open" &&
+    issue.severity === "Low"
+) {
+
+    actionLabel =
+        "Monitor & Address";
+
+} else if (
+    issue.status === "Resolved"
+) {
+
+    actionLabel =
+        "Resolved";
+}
         item.innerHTML = `
 
             <div class="safety-alert-card">
@@ -1454,50 +1534,30 @@ async function loadSafetyIssues() {
                         </h3>
 
 
-                        <div class="safety-badges">
+                       
+                                  </div>
 
-                            <span
-                                class="${severityClass}"
-                            >
-                                ${safeText(
-                                    issue.severity
-                                )}
-                            </span>
+<div class="safety-summary">
 
+    <strong>
+        ${safeText(actionLabel)}
+    </strong>
 
-                            <span
-                                class="${statusClass}"
-                            >
-                                ${safeText(
-                                    issue.status
-                                )}
-                            </span>
+    <span>
+        Location: ${safeText(
+            issue.location || "Not specified"
+        )}
+    </span>
 
-                        </div>
+    <span>
+        Reported: ${safeText(
+            issue.reported_date || "Not specified"
+        )}
+    </span>
 
-                    </div>
+</div>
 
-                </div>
-
-
-                <div class="safety-summary">
-
-                    <span>
-                        ${safeText(
-                            issue.severity
-                        )} Severity
-                    </span>
-
-                    <span>
-                        ${safeText(
-                            issue.status
-                        )}
-                    </span>
-
-                </div>
-
-
-                <button
+                                <button
                     type="button"
                     class="view-details-btn safety-details-btn"
                 >
@@ -1783,18 +1843,15 @@ function showSafetyDetails(
 async function loadWorkers() {
 
     const {
-        data,
-        error
-    } = await supabaseClient
-        .from("workers")
-        .select("*")
-        .order(
-            "id",
-            {
-                ascending: true
-            }
-        );
-
+    data,
+    error
+} = await supabaseClient
+    .from("workers")
+    .select("*")
+    .eq("project_id", selectedProjectId)
+    .order("id", {
+        ascending: true
+    });
 
     if (error) {
 
@@ -1969,23 +2026,20 @@ async function loadEquipment() {
         error
     } = await supabaseClient
         .from("equipment")
-        .select(`
-            id,
-            equipment_name,
-            equipment_type,
-            status,
-            location,
-            last_maintenance_date,
-            next_maintenance_date,
-            remarks
-        `)
-        .order(
-            "id",
-            {
-                ascending: true
-            }
-        );
-
+.select(`
+    id,
+    equipment_name,
+    equipment_type,
+    status,
+    location,
+    last_maintenance_date,
+    next_maintenance_date,
+    remarks
+`)
+.eq("project_id", selectedProjectId)
+ .order("id", {
+        ascending: true
+    });
 
     if (error) {
 
@@ -2140,13 +2194,12 @@ async function loadMaintenanceAlerts() {
         data,
         error
     } = await supabaseClient
-        .from("equipment")
-        .select(`
-            equipment_name,
-            next_maintenance_date
-        `);
-
-
+      .from("equipment")
+.select(`
+    equipment_name,
+    next_maintenance_date
+`)
+.eq("project_id", selectedProjectId);
     if (error) {
 
         console.error(
@@ -2354,39 +2407,38 @@ async function loadMaintenanceAlerts() {
 async function loadDashboard() {
 
     const [
-        projectResult,
-        workersResult,
-        equipmentResult,
-        safetyResult
-    ] = await Promise.all([
+    projectResult,
+    workersResult,
+    equipmentResult,
+    safetyResult
+] = await Promise.all([
 
-        supabaseClient
-            .from("projects")
-            .select(
-                "id, overall_progress"
-            )
-            .limit(1)
-            .single(),
+    // Selected project
+    supabaseClient
+        .from("projects")
+        .select("id, overall_progress")
+        .eq("id", selectedProjectId)
+        .single(),
 
+    // Workers for selected project
+    supabaseClient
+        .from("workers")
+        .select("id")
+        .eq("project_id", selectedProjectId),
 
-        supabaseClient
-            .from("workers")
-            .select("id"),
+    // Equipment for selected project
+    supabaseClient
+        .from("equipment")
+        .select("id")
+        .eq("project_id", selectedProjectId),
 
+    // Safety issues for selected project
+    supabaseClient
+        .from("safety_issues")
+        .select("id, status")
+        .eq("project_id", selectedProjectId)
 
-        supabaseClient
-            .from("equipment")
-            .select("id"),
-
-
-        supabaseClient
-            .from("safety_issues")
-            .select(
-                "id, status"
-            )
-
-    ]);
-
+]);
 
     const totalWorkers =
         workersResult.data
@@ -2497,14 +2549,12 @@ async function loadDashboard() {
 async function loadSafetyDashboard() {
 
     const {
-        data,
-        error
-    } = await supabaseClient
-        .from("safety_issues")
-        .select(
-            "status, severity"
-        );
-
+    data,
+    error
+} = await supabaseClient
+    .from("safety_issues")
+    .select("status, severity")
+    .eq("project_id", selectedProjectId);
 
     if (error) {
 
@@ -2593,8 +2643,7 @@ async function loadSafetyDashboard() {
 // AI COPILOT
 // ==========================================================
 
-let chatHistory = [];
-
+let chatHistory = JSON.parse(localStorage.getItem("copilotHistory")) || [];
 
 // ==========================================================
 // OPEN COPILOT
@@ -2625,7 +2674,18 @@ function openCopilot() {
 
     overlay.style.display =
         "flex";
+const chatMessages = document.getElementById("chatMessages");
 
+if (chatMessages && chatHistory.length > 0) {
+    chatMessages.innerHTML = "";
+
+    chatHistory.forEach(item => {
+        addChatMessage(
+            item.content,
+            item.role === "user" ? "user" : "bot"
+        );
+    });
+}
 
     setTimeout(
         function() {
@@ -2733,19 +2793,15 @@ function addChatMessage(
         sender === "bot"
     ) {
 
-        messageContent.innerHTML =
-            safeText(message)
-                .replace(
-                    /\n/g,
-                    "<br>"
-                );
-
+     messageContent.innerHTML =
+    safeText(message)
+        .replace(/\*\*/g, "")
+        .replace(/^\s*[-*]\s+/gm, "")
+        .replace(/\n/g, "<br>");
     } else {
-
-        messageContent.textContent =
-            message;
-    }
-
+    messageContent.innerHTML =
+        `<strong>${safeText(message)}</strong>`;
+}
 
     messageElement.appendChild(
         messageContent
@@ -3092,6 +3148,7 @@ async function askCopilot(
         role: "user",
         content: question
     });
+localStorage.setItem("copilotHistory", JSON.stringify(chatHistory));
 
 
     showTyping();
@@ -3182,7 +3239,7 @@ async function askCopilot(
                 content: fallback
             });
 
-
+localStorage.setItem("copilotHistory", JSON.stringify(chatHistory));
             return;
         }
 
@@ -3508,28 +3565,29 @@ async function initializeSite() {
     setupDashboardActions();
 
 
-    await Promise.all([
+    // Load the selected project first
+await loadProject();
 
-        loadProject(),
+// Then load all project-related data
+await Promise.all([
 
-        loadProgress(),
+    loadProgress(),
 
-        loadDailyActivities(),
+    loadDailyActivities(),
 
-        loadSafetyIssues(),
+    loadSafetyIssues(),
 
-        loadWorkers(),
+    loadWorkers(),
 
-        loadEquipment(),
+    loadEquipment(),
 
-        loadMaintenanceAlerts(),
+    loadMaintenanceAlerts(),
 
-        loadDashboard(),
+    loadDashboard(),
 
-        loadSafetyDashboard()
+    loadSafetyDashboard()
 
-    ]);
-
+]);
 
     console.log(
         "Smart Construction Site loaded successfully."
